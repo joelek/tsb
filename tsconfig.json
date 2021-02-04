@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"composite": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"outDir": "./build/",
+		"rootDir": "./projects/",
+		"strict": true,
+		"target": "esnext"
+	},
+	"include": [],
+	"references": [
+		{
+			"path": "./projects/cli/"
+		}
+	]
+}

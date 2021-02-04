@@ -1,0 +1,26 @@
+{
+	"bin": {
+		"tsb": "./dist/cli.js"
+	},
+	"dependencies": {
+		"typescript": "^4"
+	},
+	"devDependencies": {
+		"@types/node": "^14"
+	},
+	"license": "MIT",
+	"name": "@joelek/ts-bundle",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/joelek/ts-bundle.git"
+	},
+	"scripts": {
+		"build": "npm run compile && npm run bundle",
+		"bundle": "rm -rf ./dist/ && node ./build/cli/index.js --entry=./build/cli/index.js --bundle=./dist/cli.js",
+		"clean": "rm -rf ./build/ ./node_modules/",
+		"compile": "rm -rf ./build/ && npx tsc --build",
+		"preversion": "npm run build && git add ./",
+		"postversion": "git push && git push --tags"
+	},
+	"version": "0.0.0"
+}
