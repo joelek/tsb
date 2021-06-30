@@ -63,3 +63,8 @@ npm install joelek/ts-bundle#master
 ```
 
 NB: This project targets TypeScript 4 in strict mode.
+
+## Roadmap
+
+* Extract library functions into separate subproject.
+* Add better support for legacy import expressions.
