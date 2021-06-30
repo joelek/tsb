@@ -244,7 +244,9 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
         if (foundUnrecognizedArgument || is.absent(entry) || is.absent(bundle)) {
             process.stderr.write(`Arguments:\n`);
             process.stderr.write(`	--entry=string\n`);
+            process.stderr.write(`		Set entry point (input file) for bundling.\n`);
             process.stderr.write(`	--bundle=string\n`);
+            process.stderr.write(`		Set bundle (output file) for bundling.\n`);
             return 1;
         }
         try {
