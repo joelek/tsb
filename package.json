@@ -15,10 +15,10 @@
 		"url": "https://github.com/joelek/ts-bundle.git"
 	},
 	"scripts": {
-		"build": "npm run compile && npm run bundle",
-		"bundle": "rm -rf ./dist/ && node ./build/cli/index.js --entry=./build/cli/index.js --bundle=./dist/cli.js",
+		"build": "npm run compile && npm run package",
 		"clean": "rm -rf ./build/ ./node_modules/",
 		"compile": "rm -rf ./build/ && npx tsc --build",
+		"package": "rm -rf ./dist/ && node ./build/cli/index.js --entry=./build/cli/index.js --bundle=./dist/cli.js",
 		"preversion": "npm run build && git add ./",
 		"postversion": "git push && git push --tags"
 	},
