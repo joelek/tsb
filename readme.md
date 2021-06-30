@@ -2,7 +2,7 @@
 
 JavaScript bundler powered by the TypeScript compiler.
 
-## Motivation
+## Background
 
 The TypeScript compiler is incredibly versatile. It supports a wide variety of different script targets, module systems and includes compiler settings for almost every use-case.
 
@@ -48,4 +48,10 @@ Releases follow semantic versioning and release packages are published using the
 npm install joelek/ts-bundle#semver:^0
 ```
 
-NB: This project currently targets TypeScript 4. Some features may not be supported for older TypeScript versions.
+Use the following command to install the very latest build. The very latest build may include breaking changes and should not be used in production environments.
+
+```
+npm install joelek/ts-bundle#master
+```
+
+NB: This project targets TypeScript 4 in strict mode.
