@@ -121,7 +121,8 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
         };
     }
     function createCompilerHost(options, pkg) {
-        let dependencies = pkg?.dependencies ?? {};
+        var _a;
+        let dependencies = (_a = pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) !== null && _a !== void 0 ? _a : {};
         let host = libts.createCompilerHost(options);
         host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, options) => {
             return moduleNames.map((moduleName) => {
