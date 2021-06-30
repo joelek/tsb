@@ -2,11 +2,10 @@
 	"compilerOptions": {
 		"composite": true,
 		"module": "commonjs",
-		"moduleResolution": "node",
 		"outDir": "./build/",
 		"rootDir": "./source/",
 		"strict": true,
-		"target": "esnext"
+		"target": "es6"
 	},
 	"include": [],
 	"references": [
