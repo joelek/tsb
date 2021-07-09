@@ -18,7 +18,120 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = void 0;
+    exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = exports.esmExportStarFromExportStarRequire = exports.esmImportStarFromImportStarRequire = void 0;
+    const DEBUG = false;
+    // Transforms `var/let/const <import> = __importStar(require(<path>));` into `import * as <import> from <path>;`.
+    function esmImportStarFromImportStarRequire(node, factory) {
+        if (!libts.isVariableStatement(node)) {
+            return node;
+        }
+        let variableStatement = node;
+        let variableDeclarationList = variableStatement.declarationList;
+        // TODO: Support more than one declaration per statement.
+        if (variableDeclarationList.declarations.length !== 1) {
+            return node;
+        }
+        let variableDeclaration = variableDeclarationList.declarations[0];
+        let importIdentifier = variableDeclaration.name;
+        if (!libts.isIdentifier(importIdentifier)) {
+            return node;
+        }
+        let importStarCall = variableDeclaration.initializer;
+        if (is.absent(importStarCall)) {
+            return node;
+        }
+        if (!libts.isCallExpression(importStarCall)) {
+            return node;
+        }
+        let importStarIdentifier = importStarCall.expression;
+        if (!libts.isIdentifier(importStarIdentifier)) {
+            return node;
+        }
+        if (importStarIdentifier.getText() !== "__importStar") {
+            return node;
+        }
+        let importStarArguments = importStarCall.arguments;
+        if (importStarArguments.length !== 1) {
+            return node;
+        }
+        let requireCall = importStarArguments[0];
+        if (!libts.isCallExpression(requireCall)) {
+            return node;
+        }
+        let requireIdentifier = requireCall.expression;
+        if (!libts.isIdentifier(requireIdentifier)) {
+            return node;
+        }
+        if (requireIdentifier.getText() !== "require") {
+            return node;
+        }
+        let requireArguments = requireCall.arguments;
+        if (requireArguments.length !== 1) {
+            return node;
+        }
+        let requireArgument = requireArguments[0];
+        if (!libts.isStringLiteral(requireArgument)) {
+            return node;
+        }
+        if (DEBUG)
+            console.log("esmImportStarFromImportStarRequire", requireArgument.getText());
+        return factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(importIdentifier)), requireArgument);
+    }
+    exports.esmImportStarFromImportStarRequire = esmImportStarFromImportStarRequire;
+    ;
+    // Transforms `__exportStar(require(<path>), exports);` into `export * from <path>;`.
+    function esmExportStarFromExportStarRequire(node, factory) {
+        if (!libts.isExpressionStatement(node)) {
+            return node;
+        }
+        let exportStarCall = node.expression;
+        if (!libts.isCallExpression(exportStarCall)) {
+            return node;
+        }
+        let exportStarIdentifier = exportStarCall.expression;
+        if (!libts.isIdentifier(exportStarIdentifier)) {
+            return node;
+        }
+        if (exportStarIdentifier.getText() !== "__exportStar") {
+            return node;
+        }
+        let exportStarArguments = exportStarCall.arguments;
+        if (exportStarArguments.length !== 2) {
+            return node;
+        }
+        let requireCall = exportStarArguments[0];
+        if (!libts.isCallExpression(requireCall)) {
+            return node;
+        }
+        let requireIdentifier = requireCall.expression;
+        if (!libts.isIdentifier(requireIdentifier)) {
+            return node;
+        }
+        if (requireIdentifier.getText() !== "require") {
+            return node;
+        }
+        let requireArguments = requireCall.arguments;
+        if (requireArguments.length !== 1) {
+            return node;
+        }
+        let requireArgument = requireArguments[0];
+        if (!libts.isStringLiteral(requireArgument)) {
+            return node;
+        }
+        let exportsIdentifier = exportStarArguments[1];
+        if (!libts.isIdentifier(exportsIdentifier)) {
+            return node;
+        }
+        if (exportsIdentifier.getText() !== "exports") {
+            return node;
+        }
+        if (DEBUG)
+            console.log("esmExportStarFromExportStarRequire", requireArgument.getText());
+        return factory.createExportDeclaration(undefined, undefined, false, undefined, requireArgument);
+    }
+    exports.esmExportStarFromExportStarRequire = esmExportStarFromExportStarRequire;
+    ;
+    // Transforms `var/let/const <import> = require(<path>);` into `import * as <import> from <path>;`.
     function esmImportFromCjsRequire(node, factory) {
         if (!libts.isVariableStatement(node)) {
             return node;
@@ -30,65 +143,87 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
             return node;
         }
         let variableDeclaration = variableDeclarationList.declarations[0];
-        let bindingName = variableDeclaration.name;
-        let expression = variableDeclaration.initializer;
-        if (is.absent(expression) || !libts.isCallExpression(expression)) {
+        let importIdentifier = variableDeclaration.name;
+        if (!libts.isIdentifier(importIdentifier)) {
             return node;
         }
-        let callExpression = expression;
-        if (callExpression.expression.getText() !== "require") {
+        let requireCall = variableDeclaration.initializer;
+        if (is.absent(requireCall)) {
             return node;
         }
-        if (callExpression.arguments.length !== 1) {
+        if (!libts.isCallExpression(requireCall)) {
             return node;
         }
-        let argument = callExpression.arguments[0];
-        if (!libts.isStringLiteral(argument)) {
+        let requireIdentifier = requireCall.expression;
+        if (!libts.isIdentifier(requireIdentifier)) {
             return node;
         }
-        let stringLiteral = argument;
-        return factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(factory.createIdentifier(bindingName.getText()))), stringLiteral);
+        if (requireIdentifier.getText() !== "require") {
+            return node;
+        }
+        let requireArguments = requireCall.arguments;
+        if (requireArguments.length !== 1) {
+            return node;
+        }
+        let requireArgument = requireArguments[0];
+        if (!libts.isStringLiteral(requireArgument)) {
+            return node;
+        }
+        if (DEBUG)
+            console.log("esmImportFromCjsRequire", requireArgument.getText());
+        return factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(importIdentifier)), requireArgument);
     }
     exports.esmImportFromCjsRequire = esmImportFromCjsRequire;
     ;
+    // Transforms `exports.<export> = require(<path>);` into `export * as <export> from <path>;`.
     function esmExportFromCjsRequire(node, factory) {
         if (!libts.isExpressionStatement(node)) {
             return node;
         }
-        if (!libts.isBinaryExpression(node.expression)) {
+        let expression = node.expression;
+        if (!libts.isBinaryExpression(expression)) {
             return node;
         }
-        let binaryExpression = node.expression;
-        let left = binaryExpression.left;
-        let operator = binaryExpression.operatorToken;
-        let right = binaryExpression.right;
-        if (!libts.isPropertyAccessExpression(left)) {
+        if (expression.operatorToken.kind !== libts.SyntaxKind.EqualsToken) {
             return node;
         }
-        if (!libts.isIdentifier(left.expression) || left.expression.getText() !== "exports") {
+        let exportsExpression = expression.left;
+        if (!libts.isPropertyAccessExpression(exportsExpression)) {
             return node;
         }
-        if (!libts.isIdentifier(left.name)) {
+        let exportsIdentifier = exportsExpression.expression;
+        if (!libts.isIdentifier(exportsIdentifier)) {
             return node;
         }
-        if (operator.kind !== libts.SyntaxKind.EqualsToken) {
+        if (exportsIdentifier.getText() !== "exports") {
             return node;
         }
-        if (!libts.isCallExpression(right)) {
+        let exportIdentifier = exportsExpression.name;
+        if (!libts.isIdentifier(exportIdentifier)) {
             return node;
         }
-        let expression = right.expression;
-        if (!libts.isIdentifier(expression) || expression.getText() !== "require") {
+        let requireCall = expression.right;
+        if (!libts.isCallExpression(requireCall)) {
             return node;
         }
-        if (right.arguments.length !== 1) {
+        let requireIdentifier = requireCall.expression;
+        if (!libts.isIdentifier(requireIdentifier)) {
             return node;
         }
-        let argument = right.arguments[0];
-        if (!libts.isStringLiteral(argument)) {
+        if (requireIdentifier.getText() !== "require") {
             return node;
         }
-        return factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(left.name), argument);
+        let requireArguments = requireCall.arguments;
+        if (requireArguments.length !== 1) {
+            return node;
+        }
+        let requireArgument = requireArguments[0];
+        if (!libts.isStringLiteral(requireArgument)) {
+            return node;
+        }
+        if (DEBUG)
+            console.log("esmExportFromCjsRequire", requireArgument.getText());
+        return factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(exportIdentifier), requireArgument);
     }
     exports.esmExportFromCjsRequire = esmExportFromCjsRequire;
     ;
@@ -98,7 +233,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.bundle = void 0;
-    const DEFINE = `function define(e,t,l){null==this.x&&(this.x=new Map),null==this.z&&(this.z=(e=>require(e))),null==this.y&&(this.y=(e=>{let t=this.x.get(e);if(null==t||null!=t.module)return;let l=Array(),u={exports:{}};for(let e of t.dependencies){if("require"===e){l.push(this.z);continue}if("module"===e){l.push(u);continue}if("exports"===e){l.push(u.exports);continue}try{l.push(this.z(e));continue}catch(e){}let t=this.x.get(e);if(null==t||null==t.module)return;l.push(t.module.exports)}t.callback(...l),t.module=u;for(let e of t.dependencies)this.y(e)}));let u=this.x.get(e);if(null!=u)throw'Duplicate module found with name "'+e+'"!';u={callback:l,dependencies:t,module:null},this.x.set(e,u),this.y(e)}`;
+    const DEFINE = `function define(e,t,l){let u=define;function n(e){return require(e)}null==u.moduleStates&&(u.moduleStates=new Map);let o=u.moduleStates.get(e);if(null!=o)throw'Duplicate module found with name "'+e+'"!';o={callback:l,dependencies:t,module:null},u.moduleStates.set(e,o),function e(t){let l=u.moduleStates.get(t);if(null==l||null!=l.module)return;let o=Array(),d={exports:{}};for(let e of l.dependencies){if("require"===e){o.push(n);continue}if("module"===e){o.push(d);continue}if("exports"===e){o.push(d.exports);continue}try{o.push(n(e));continue}catch(e){}let t=u.moduleStates.get(e);if(null==t||null==t.module)return;o.push(t.module.exports)}l.callback(...o),l.module=d;for(let t of l.dependencies)e(t)}(e)}`;
     function createTransformers() {
         return {
             before: [
@@ -112,6 +247,8 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                             return libts.visitEachChild(node, (node) => {
                                 node = transformers.esmImportFromCjsRequire(node, factory);
                                 node = transformers.esmExportFromCjsRequire(node, factory);
+                                node = transformers.esmExportStarFromExportStarRequire(node, factory);
+                                node = transformers.esmImportStarFromImportStarRequire(node, factory);
                                 return node;
                             }, context);
                         }
@@ -185,6 +322,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
     function bundle(options) {
         let config = {
             allowJs: true,
+            esModuleInterop: false,
             isolatedModules: true,
             module: libts.ModuleKind.AMD,
             moduleResolution: libts.ModuleResolutionKind.NodeJs,
@@ -257,10 +395,10 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
             return 0;
         }
         catch (error) {
-            process.stderr.write(error);
+            process.stderr.write(String(error) + "\n");
             return 1;
         }
     }
     process.exit(run());
 });
-function define(e,t,l){null==this.x&&(this.x=new Map),null==this.z&&(this.z=(e=>require(e))),null==this.y&&(this.y=(e=>{let t=this.x.get(e);if(null==t||null!=t.module)return;let l=Array(),u={exports:{}};for(let e of t.dependencies){if("require"===e){l.push(this.z);continue}if("module"===e){l.push(u);continue}if("exports"===e){l.push(u.exports);continue}try{l.push(this.z(e));continue}catch(e){}let t=this.x.get(e);if(null==t||null==t.module)return;l.push(t.module.exports)}t.callback(...l),t.module=u;for(let e of t.dependencies)this.y(e)}));let u=this.x.get(e);if(null!=u)throw'Duplicate module found with name "'+e+'"!';u={callback:l,dependencies:t,module:null},this.x.set(e,u),this.y(e)}
+function define(e,t,l){let u=define;function n(e){return require(e)}null==u.moduleStates&&(u.moduleStates=new Map);let o=u.moduleStates.get(e);if(null!=o)throw'Duplicate module found with name "'+e+'"!';o={callback:l,dependencies:t,module:null},u.moduleStates.set(e,o),function e(t){let l=u.moduleStates.get(t);if(null==l||null!=l.module)return;let o=Array(),d={exports:{}};for(let e of l.dependencies){if("require"===e){o.push(n);continue}if("module"===e){o.push(d);continue}if("exports"===e){o.push(d.exports);continue}try{o.push(n(e));continue}catch(e){}let t=u.moduleStates.get(e);if(null==t||null==t.module)return;o.push(t.module.exports)}l.callback(...o),l.module=d;for(let t of l.dependencies)e(t)}(e)}
