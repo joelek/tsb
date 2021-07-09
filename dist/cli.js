@@ -19,9 +19,8 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.esmExportStarFromImportStarRequire = exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = exports.esmExportStarFromExportStarRequire = exports.esmImportStarFromImportStarRequire = void 0;
-    const DEBUG = false;
     // Transforms `var/let/const <import> = __importStar(require(<path>));` into `import * as <import> from <path>;`.
-    function esmImportStarFromImportStarRequire(node, factory) {
+    function esmImportStarFromImportStarRequire(node, factory, options) {
         if (!libts.isVariableStatement(node)) {
             return node;
         }
@@ -73,14 +72,14 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (DEBUG)
+        if (options.debug)
             console.log("esmImportStarFromImportStarRequire", requireArgument.getText());
         return factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(importIdentifier)), requireArgument);
     }
     exports.esmImportStarFromImportStarRequire = esmImportStarFromImportStarRequire;
     ;
     // Transforms `__exportStar(require(<path>), exports);` into `export * from <path>;`.
-    function esmExportStarFromExportStarRequire(node, factory) {
+    function esmExportStarFromExportStarRequire(node, factory, options) {
         if (!libts.isExpressionStatement(node)) {
             return node;
         }
@@ -125,14 +124,14 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (exportsIdentifier.getText() !== "exports") {
             return node;
         }
-        if (DEBUG)
+        if (options.debug)
             console.log("esmExportStarFromExportStarRequire", requireArgument.getText());
         return factory.createExportDeclaration(undefined, undefined, false, undefined, requireArgument);
     }
     exports.esmExportStarFromExportStarRequire = esmExportStarFromExportStarRequire;
     ;
     // Transforms `var/let/const <import> = require(<path>);` into `import * as <import> from <path>;`.
-    function esmImportFromCjsRequire(node, factory) {
+    function esmImportFromCjsRequire(node, factory, options) {
         if (!libts.isVariableStatement(node)) {
             return node;
         }
@@ -169,14 +168,14 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (DEBUG)
+        if (options.debug)
             console.log("esmImportFromCjsRequire", requireArgument.getText());
         return factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(importIdentifier)), requireArgument);
     }
     exports.esmImportFromCjsRequire = esmImportFromCjsRequire;
     ;
     // Transforms `exports.<export> = require(<path>);` into `export * as <export> from <path>;`.
-    function esmExportFromCjsRequire(node, factory) {
+    function esmExportFromCjsRequire(node, factory, options) {
         if (!libts.isExpressionStatement(node)) {
             return node;
         }
@@ -221,14 +220,14 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (DEBUG)
+        if (options.debug)
             console.log("esmExportFromCjsRequire", requireArgument.getText());
         return factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(exportIdentifier), requireArgument);
     }
     exports.esmExportFromCjsRequire = esmExportFromCjsRequire;
     ;
     // Transforms `exports.<export> = __importStar(require(<path>));` into `export * as <export> from <path>;`.
-    function esmExportStarFromImportStarRequire(node, factory) {
+    function esmExportStarFromImportStarRequire(node, factory, options) {
         if (!libts.isExpressionStatement(node)) {
             return node;
         }
@@ -288,7 +287,7 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (DEBUG)
+        if (options.debug)
             console.log("esmExportStarFromImportStarRequire", requireArgument.getText());
         return factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(exportIdentifier), requireArgument);
     }
@@ -301,7 +300,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.bundle = void 0;
     const DEFINE = `function define(e,t,l){let u=define;function n(e){return require(e)}null==u.moduleStates&&(u.moduleStates=new Map);let o=u.moduleStates.get(e);if(null!=o)throw'Duplicate module found with name "'+e+'"!';o={callback:l,dependencies:t,module:null},u.moduleStates.set(e,o),function e(t){let l=u.moduleStates.get(t);if(null==l||null!=l.module)return;let o=Array(),d={exports:{}};for(let e of l.dependencies){if("require"===e){o.push(n);continue}if("module"===e){o.push(d);continue}if("exports"===e){o.push(d.exports);continue}try{o.push(n(e));continue}catch(e){}let t=u.moduleStates.get(e);if(null==t||null==t.module)return;o.push(t.module.exports)}l.callback(...o),l.module=d;for(let t of l.dependencies)e(t)}(e)}`;
-    function createTransformers() {
+    function createTransformers(options) {
         return {
             before: [
                 (context) => {
@@ -312,11 +311,11 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                         },
                         transformSourceFile(node) {
                             return libts.visitEachChild(node, (node) => {
-                                node = transformers.esmImportFromCjsRequire(node, factory);
-                                node = transformers.esmExportFromCjsRequire(node, factory);
-                                node = transformers.esmExportStarFromExportStarRequire(node, factory);
-                                node = transformers.esmImportStarFromImportStarRequire(node, factory);
-                                node = transformers.esmExportStarFromImportStarRequire(node, factory);
+                                node = transformers.esmImportFromCjsRequire(node, factory, options);
+                                node = transformers.esmExportFromCjsRequire(node, factory, options);
+                                node = transformers.esmExportStarFromExportStarRequire(node, factory, options);
+                                node = transformers.esmImportStarFromImportStarRequire(node, factory, options);
+                                node = transformers.esmExportStarFromImportStarRequire(node, factory, options);
                                 return node;
                             }, context);
                         }
@@ -325,10 +324,10 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
             ]
         };
     }
-    function createCompilerHost(options, pkg) {
+    function createCompilerHost(compilerOptions, pkg, options) {
         var _a;
         let dependencies = (_a = pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) !== null && _a !== void 0 ? _a : {};
-        let host = libts.createCompilerHost(options);
+        let host = libts.createCompilerHost(compilerOptions);
         host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, options) => {
             return moduleNames.map((moduleName) => {
                 let result = libts.resolveModuleName(moduleName, containingFile, options, libts.sys);
@@ -366,7 +365,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                     module: libts.ModuleKind.ESNext,
                     target: libts.ScriptTarget.ESNext
                 },
-                transformers: createTransformers()
+                transformers: createTransformers(options)
             });
             return output.outputText;
         };
@@ -399,7 +398,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
             target: libts.ScriptTarget.ESNext
         };
         let pkg = readPackageJson(options.entry);
-        let compiler = createCompilerHost(config, pkg);
+        let compiler = createCompilerHost(config, pkg, options);
         let program = libts.createProgram([options.entry], config, compiler);
         let result = program.emit();
         let errors = result.diagnostics.map((diagnostic) => {
@@ -428,6 +427,7 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
     function run() {
+        var _a;
         let options = {};
         let foundUnrecognizedArgument = false;
         for (let argv of process.argv.slice(2)) {
@@ -440,6 +440,9 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
             else if ((parts = /^--bundle=(.+)$/.exec(argv)) != null) {
                 options.bundle = parts[1];
             }
+            else if ((parts = /^--debug=(true|false)$/.exec(argv)) != null) {
+                options.bundle = parts[1];
+            }
             else {
                 foundUnrecognizedArgument = true;
                 process.stderr.write(`Unrecognized argument \"${argv}\"!\n`);
@@ -447,18 +450,22 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
         }
         let entry = options.entry;
         let bundle = options.bundle;
+        let debug = (_a = options.debug) !== null && _a !== void 0 ? _a : false;
         if (foundUnrecognizedArgument || is.absent(entry) || is.absent(bundle)) {
             process.stderr.write(`Arguments:\n`);
             process.stderr.write(`	--entry=string\n`);
             process.stderr.write(`		Set entry point (input file) for bundling.\n`);
             process.stderr.write(`	--bundle=string\n`);
             process.stderr.write(`		Set bundle (output file) for bundling.\n`);
+            process.stderr.write(`	--debug=boolean\n`);
+            process.stderr.write(`		Set debug mode.\n`);
             return 1;
         }
         try {
             bundler.bundle({
                 entry,
-                bundle
+                bundle,
+                debug
             });
             return 0;
         }
