@@ -15,33 +15,42 @@ export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 		return node;
 	}
 	let variableDeclaration = variableDeclarationList.declarations[0];
-	let bindingName = variableDeclaration.name;
-	let expression = variableDeclaration.initializer;
-	if (is.absent(expression) || !libts.isCallExpression(expression)) {
+	let importIdentifier = variableDeclaration.name;
+	if (!libts.isIdentifier(importIdentifier)) {
 		return node;
 	}
-	let callExpression = expression;
-	if (callExpression.expression.getText() !== "require") {
+	let requireCall = variableDeclaration.initializer;
+	if (is.absent(requireCall)) {
 		return node;
 	}
-	if (callExpression.arguments.length !== 1) {
+	if (!libts.isCallExpression(requireCall)) {
 		return node;
 	}
-	let argument = callExpression.arguments[0];
-	if (!libts.isStringLiteral(argument)) {
+	let requireIdentifier = requireCall.expression;
+	if (!libts.isIdentifier(requireIdentifier)) {
 		return node;
 	}
-	let stringLiteral = argument;
-	if (DEBUG) console.log("esmImportFromCjsRequire", bindingName.getText());
+	if (requireIdentifier.getText() !== "require") {
+		return node;
+	}
+	let requireArguments = requireCall.arguments;
+	if (requireArguments.length !== 1) {
+		return node;
+	}
+	let requireArgument = requireArguments[0];
+	if (!libts.isStringLiteral(requireArgument)) {
+		return node;
+	}
+	if (DEBUG) console.log("esmImportFromCjsRequire", requireArgument.getText());
 	return factory.createImportDeclaration(
 		undefined,
 		undefined,
 		factory.createImportClause(
 			false,
 			undefined,
-			factory.createNamespaceImport(factory.createIdentifier(bindingName.getText()))
+			factory.createNamespaceImport(importIdentifier)
 		),
-		stringLiteral
+		requireArgument
 	);
 };
 
@@ -50,45 +59,53 @@ export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 	if (!libts.isExpressionStatement(node)) {
 		return node;
 	}
-	if (!libts.isBinaryExpression(node.expression)) {
+	let expression = node.expression;
+	if (!libts.isBinaryExpression(expression)) {
 		return node;
 	}
-	let binaryExpression = node.expression;
-	let left = binaryExpression.left;
-	let operator = binaryExpression.operatorToken;
-	let right = binaryExpression.right;
-	if (!libts.isPropertyAccessExpression(left)) {
+	if (expression.operatorToken.kind !== libts.SyntaxKind.EqualsToken) {
 		return node;
 	}
-	if (!libts.isIdentifier(left.expression) || left.expression.getText() !== "exports") {
+	let exportsExpression = expression.left;
+	if (!libts.isPropertyAccessExpression(exportsExpression)) {
 		return node;
 	}
-	if (!libts.isIdentifier(left.name)) {
+	let exportsIdentifier = exportsExpression.expression;
+	if (!libts.isIdentifier(exportsIdentifier)) {
 		return node;
 	}
-	if (operator.kind !== libts.SyntaxKind.EqualsToken) {
+	if (exportsIdentifier.getText() !== "exports") {
 		return node;
 	}
-	if (!libts.isCallExpression(right)) {
+	let exportIdentifier = exportsExpression.name;
+	if (!libts.isIdentifier(exportIdentifier)) {
 		return node;
 	}
-	let expression = right.expression;
-	if (!libts.isIdentifier(expression) || expression.getText() !== "require") {
+	let requireCall = expression.right;
+	if (!libts.isCallExpression(requireCall)) {
 		return node;
 	}
-	if (right.arguments.length !== 1) {
+	let requireIdentifier = requireCall.expression;
+	if (!libts.isIdentifier(requireIdentifier)) {
 		return node;
 	}
-	let argument = right.arguments[0];
-	if (!libts.isStringLiteral(argument)) {
+	if (requireIdentifier.getText() !== "require") {
 		return node;
 	}
-	if (DEBUG) console.log("esmExportFromCjsRequire", argument.getText());
+	let requireArguments = requireCall.arguments;
+	if (requireArguments.length !== 1) {
+		return node;
+	}
+	let requireArgument = requireArguments[0];
+	if (!libts.isStringLiteral(requireArgument)) {
+		return node;
+	}
+	if (DEBUG) console.log("esmExportFromCjsRequire", requireArgument.getText());
 	return factory.createExportDeclaration(
 		undefined,
 		undefined,
 		false,
-		factory.createNamespaceExport(left.name),
-		argument
+		factory.createNamespaceExport(exportIdentifier),
+		requireArgument
 	);
 };
