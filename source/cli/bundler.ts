@@ -99,6 +99,7 @@ export type Options = {
 export function bundle(options: Options): void {
 	let config: libts.CompilerOptions = {
 		allowJs: true,
+		esModuleInterop: false,
 		isolatedModules: true,
 		module: libts.ModuleKind.AMD,
 		moduleResolution: libts.ModuleResolutionKind.NodeJs,
