@@ -1,10 +1,11 @@
 import * as libts from "typescript";
 import * as is from "./is";
+import * as shared from "./shared";
 import * as transformers from "./transformers";
 
 const DEFINE = `function define(e,t,l){let u=define;function n(e){return require(e)}null==u.moduleStates&&(u.moduleStates=new Map);let o=u.moduleStates.get(e);if(null!=o)throw'Duplicate module found with name "'+e+'"!';o={callback:l,dependencies:t,module:null},u.moduleStates.set(e,o),function e(t){let l=u.moduleStates.get(t);if(null==l||null!=l.module)return;let o=Array(),d={exports:{}};for(let e of l.dependencies){if("require"===e){o.push(n);continue}if("module"===e){o.push(d);continue}if("exports"===e){o.push(d.exports);continue}try{o.push(n(e));continue}catch(e){}let t=u.moduleStates.get(e);if(null==t||null==t.module)return;o.push(t.module.exports)}l.callback(...o),l.module=d;for(let t of l.dependencies)e(t)}(e)}`;
 
-function createTransformers(): libts.CustomTransformers {
+function createTransformers(options: shared.Options): libts.CustomTransformers {
 	return {
 		before: [
 			(context) => {
@@ -15,11 +16,11 @@ function createTransformers(): libts.CustomTransformers {
 					},
 					transformSourceFile(node) {
 						return libts.visitEachChild(node, (node) => {
-							node = transformers.esmImportFromCjsRequire(node, factory);
-							node = transformers.esmExportFromCjsRequire(node, factory);
-							node = transformers.esmExportStarFromExportStarRequire(node, factory);
-							node = transformers.esmImportStarFromImportStarRequire(node, factory);
-							node = transformers.esmExportStarFromImportStarRequire(node, factory);
+							node = transformers.esmImportFromCjsRequire(node, factory, options);
+							node = transformers.esmExportFromCjsRequire(node, factory, options);
+							node = transformers.esmExportStarFromExportStarRequire(node, factory, options);
+							node = transformers.esmImportStarFromImportStarRequire(node, factory, options);
+							node = transformers.esmExportStarFromImportStarRequire(node, factory, options);
 							return node;
 						}, context);
 					}
@@ -29,9 +30,9 @@ function createTransformers(): libts.CustomTransformers {
 	};
 }
 
-function createCompilerHost(options: libts.CompilerOptions, pkg: any): libts.CompilerHost {
+function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, options: shared.Options): libts.CompilerHost {
 	let dependencies = pkg?.dependencies ?? {};
-	let host = libts.createCompilerHost(options);
+	let host = libts.createCompilerHost(compilerOptions);
 	host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, options) => {
 		return moduleNames.map((moduleName) => {
 			let result = libts.resolveModuleName(moduleName, containingFile, options, libts.sys);
@@ -69,7 +70,7 @@ function createCompilerHost(options: libts.CompilerOptions, pkg: any): libts.Com
 				module: libts.ModuleKind.ESNext,
 				target: libts.ScriptTarget.ESNext
 			},
-			transformers: createTransformers()
+			transformers: createTransformers(options)
 		});
 		return output.outputText;
 	};
@@ -92,12 +93,7 @@ function readPackageJson(entry: string): any {
 	return JSON.parse(contents);
 }
 
-export type Options = {
-	entry: string;
-	bundle: string;
-};
-
-export function bundle(options: Options): void {
+export function bundle(options: shared.Options): void {
 	let config: libts.CompilerOptions = {
 		allowJs: true,
 		esModuleInterop: false,
@@ -109,7 +105,7 @@ export function bundle(options: Options): void {
 		target: libts.ScriptTarget.ESNext
 	};
 	let pkg = readPackageJson(options.entry);
-	let compiler = createCompilerHost(config, pkg);
+	let compiler = createCompilerHost(config, pkg, options);
 	let program = libts.createProgram([ options.entry ], config, compiler);
 	let result = program.emit();
 	let errors = result.diagnostics.map((diagnostic) => {

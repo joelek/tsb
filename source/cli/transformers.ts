@@ -1,10 +1,9 @@
 import * as libts from "typescript";
 import * as is from "./is";
-
-const DEBUG = false;
+import * as shared from "./shared";
 
 // Transforms `var/let/const <import> = __importStar(require(<path>));` into `import * as <import> from <path>;`.
-export function esmImportStarFromImportStarRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
+export function esmImportStarFromImportStarRequire(node: libts.Node, factory: libts.NodeFactory, options: shared.Options): libts.Node {
 	if (!libts.isVariableStatement(node)) {
 		return node;
 	}
@@ -56,7 +55,7 @@ export function esmImportStarFromImportStarRequire(node: libts.Node, factory: li
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (DEBUG) console.log("esmImportStarFromImportStarRequire", requireArgument.getText());
+	if (options.debug) console.log("esmImportStarFromImportStarRequire", requireArgument.getText());
 	return factory.createImportDeclaration(
 		undefined,
 		undefined,
@@ -70,7 +69,7 @@ export function esmImportStarFromImportStarRequire(node: libts.Node, factory: li
 };
 
 // Transforms `__exportStar(require(<path>), exports);` into `export * from <path>;`.
-export function esmExportStarFromExportStarRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
+export function esmExportStarFromExportStarRequire(node: libts.Node, factory: libts.NodeFactory, options: shared.Options): libts.Node {
 	if (!libts.isExpressionStatement(node)) {
 		return node;
 	}
@@ -115,7 +114,7 @@ export function esmExportStarFromExportStarRequire(node: libts.Node, factory: li
 	if (exportsIdentifier.getText() !== "exports") {
 		return node;
 	}
-	if (DEBUG) console.log("esmExportStarFromExportStarRequire", requireArgument.getText());
+	if (options.debug) console.log("esmExportStarFromExportStarRequire", requireArgument.getText());
 	return factory.createExportDeclaration(
 		undefined,
 		undefined,
@@ -126,7 +125,7 @@ export function esmExportStarFromExportStarRequire(node: libts.Node, factory: li
 };
 
 // Transforms `var/let/const <import> = require(<path>);` into `import * as <import> from <path>;`.
-export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
+export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory, options: shared.Options): libts.Node {
 	if (!libts.isVariableStatement(node)) {
 		return node;
 	}
@@ -163,7 +162,7 @@ export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (DEBUG) console.log("esmImportFromCjsRequire", requireArgument.getText());
+	if (options.debug) console.log("esmImportFromCjsRequire", requireArgument.getText());
 	return factory.createImportDeclaration(
 		undefined,
 		undefined,
@@ -177,7 +176,7 @@ export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 };
 
 // Transforms `exports.<export> = require(<path>);` into `export * as <export> from <path>;`.
-export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
+export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory, options: shared.Options): libts.Node {
 	if (!libts.isExpressionStatement(node)) {
 		return node;
 	}
@@ -222,7 +221,7 @@ export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (DEBUG) console.log("esmExportFromCjsRequire", requireArgument.getText());
+	if (options.debug) console.log("esmExportFromCjsRequire", requireArgument.getText());
 	return factory.createExportDeclaration(
 		undefined,
 		undefined,
@@ -233,7 +232,7 @@ export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 };
 
 // Transforms `exports.<export> = __importStar(require(<path>));` into `export * as <export> from <path>;`.
-export function esmExportStarFromImportStarRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
+export function esmExportStarFromImportStarRequire(node: libts.Node, factory: libts.NodeFactory, options: shared.Options): libts.Node {
 	if (!libts.isExpressionStatement(node)) {
 		return node;
 	}
@@ -293,7 +292,7 @@ export function esmExportStarFromImportStarRequire(node: libts.Node, factory: li
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (DEBUG) console.log("esmExportStarFromImportStarRequire", requireArgument.getText());
+	if (options.debug) console.log("esmExportStarFromImportStarRequire", requireArgument.getText());
 	return factory.createExportDeclaration(
 		undefined,
 		undefined,
