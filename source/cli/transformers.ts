@@ -1,6 +1,8 @@
 import * as libts from "typescript";
 import * as is from "./is";
 
+const DEBUG = false;
+
 export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
 	if (!libts.isVariableStatement(node)) {
 		return node;
@@ -29,6 +31,7 @@ export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 		return node;
 	}
 	let stringLiteral = argument;
+	if (DEBUG) console.log("esmImportFromCjsRequire", bindingName.getText());
 	return factory.createImportDeclaration(
 		undefined,
 		undefined,
@@ -78,6 +81,7 @@ export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 	if (!libts.isStringLiteral(argument)) {
 		return node;
 	}
+	if (DEBUG) console.log("esmExportFromCjsRequire", argument.getText());
 	return factory.createExportDeclaration(
 		undefined,
 		undefined,
