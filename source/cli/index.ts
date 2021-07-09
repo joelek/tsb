@@ -35,7 +35,7 @@ function run(): number {
 		});
 		return 0;
 	} catch (error) {
-		process.stderr.write(error);
+		process.stderr.write(String(error) + "\n");
 		return 1;
 	}
 }
