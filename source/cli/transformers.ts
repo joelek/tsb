@@ -3,6 +3,7 @@ import * as is from "./is";
 
 const DEBUG = false;
 
+// Transforms `var/let/const <import> = require(<path>);` into `import * as <import> from <path>;`.
 export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
 	if (!libts.isVariableStatement(node)) {
 		return node;
@@ -44,6 +45,7 @@ export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 	);
 };
 
+// Transforms `exports.<export> = require(<path>);` into `export * as <export> from <path>;`.
 export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
 	if (!libts.isExpressionStatement(node)) {
 		return node;
