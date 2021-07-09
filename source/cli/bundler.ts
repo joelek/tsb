@@ -33,9 +33,9 @@ function createTransformers(options: shared.Options): libts.CustomTransformers {
 function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, options: shared.Options): libts.CompilerHost {
 	let dependencies = pkg?.dependencies ?? {};
 	let host = libts.createCompilerHost(compilerOptions);
-	host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, options) => {
+	host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
 		return moduleNames.map((moduleName) => {
-			let result = libts.resolveModuleName(moduleName, containingFile, options, libts.sys);
+			let result = libts.resolveModuleName(moduleName, containingFile, compilerOptions, libts.sys);
 			if (is.absent(result.resolvedModule)) {
 				return;
 			}
@@ -51,6 +51,7 @@ function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, op
 			if (is.present(packageId) && (packageId.name in dependencies)) {
 				isExternalLibraryImport = true;
 			}
+			if (options.debug) console.log(`Resolved "${moduleName}" to "${resolvedFileName}" (${isExternalLibraryImport ? "external" : "internal"})`);
 			return {
 				resolvedFileName,
 				isExternalLibraryImport
