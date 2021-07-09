@@ -441,7 +441,7 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
                 options.bundle = parts[1];
             }
             else if ((parts = /^--debug=(true|false)$/.exec(argv)) != null) {
-                options.bundle = parts[1];
+                options.debug = parts[1] === "true";
             }
             else {
                 foundUnrecognizedArgument = true;

@@ -15,7 +15,7 @@ function run(): number {
 		} else if ((parts = /^--bundle=(.+)$/.exec(argv)) != null) {
 			options.bundle = parts[1];
 		} else if ((parts = /^--debug=(true|false)$/.exec(argv)) != null) {
-			options.bundle = parts[1];
+			options.debug = parts[1] === "true";
 		} else {
 			foundUnrecognizedArgument = true;
 			process.stderr.write(`Unrecognized argument \"${argv}\"!\n`);
