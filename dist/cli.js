@@ -328,9 +328,9 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
         var _a;
         let dependencies = (_a = pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) !== null && _a !== void 0 ? _a : {};
         let host = libts.createCompilerHost(compilerOptions);
-        host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, options) => {
+        host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
             return moduleNames.map((moduleName) => {
-                let result = libts.resolveModuleName(moduleName, containingFile, options, libts.sys);
+                let result = libts.resolveModuleName(moduleName, containingFile, compilerOptions, libts.sys);
                 if (is.absent(result.resolvedModule)) {
                     return;
                 }
@@ -346,6 +346,8 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                 if (is.present(packageId) && (packageId.name in dependencies)) {
                     isExternalLibraryImport = true;
                 }
+                if (options.debug)
+                    console.log(`Resolved "${moduleName}" to "${resolvedFileName}" (${isExternalLibraryImport ? "external" : "internal"})`);
                 return {
                     resolvedFileName,
                     isExternalLibraryImport
