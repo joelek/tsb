@@ -18,7 +18,7 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = exports.esmExportStarFromExportStarRequire = exports.esmImportStarFromImportStarRequire = void 0;
+    exports.esmExportStarFromImportStarRequire = exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = exports.esmExportStarFromExportStarRequire = exports.esmImportStarFromImportStarRequire = void 0;
     const DEBUG = false;
     // Transforms `var/let/const <import> = __importStar(require(<path>));` into `import * as <import> from <path>;`.
     function esmImportStarFromImportStarRequire(node, factory) {
@@ -227,6 +227,73 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
     }
     exports.esmExportFromCjsRequire = esmExportFromCjsRequire;
     ;
+    // Transforms `exports.<export> = __importStar(require(<path>));` into `export * as <export> from <path>;`.
+    function esmExportStarFromImportStarRequire(node, factory) {
+        if (!libts.isExpressionStatement(node)) {
+            return node;
+        }
+        let expression = node.expression;
+        if (!libts.isBinaryExpression(expression)) {
+            return node;
+        }
+        if (expression.operatorToken.kind !== libts.SyntaxKind.EqualsToken) {
+            return node;
+        }
+        let exportsExpression = expression.left;
+        if (!libts.isPropertyAccessExpression(exportsExpression)) {
+            return node;
+        }
+        let exportsIdentifier = exportsExpression.expression;
+        if (!libts.isIdentifier(exportsIdentifier)) {
+            return node;
+        }
+        if (exportsIdentifier.getText() !== "exports") {
+            return node;
+        }
+        let exportIdentifier = exportsExpression.name;
+        if (!libts.isIdentifier(exportIdentifier)) {
+            return node;
+        }
+        let importStarCall = expression.right;
+        if (!libts.isCallExpression(importStarCall)) {
+            return node;
+        }
+        let importStarIdentifier = importStarCall.expression;
+        if (!libts.isIdentifier(importStarIdentifier)) {
+            return node;
+        }
+        if (importStarIdentifier.getText() !== "__importStar") {
+            return node;
+        }
+        let importStarArguments = importStarCall.arguments;
+        if (importStarArguments.length !== 1) {
+            return node;
+        }
+        let requireCall = importStarArguments[0];
+        if (!libts.isCallExpression(requireCall)) {
+            return node;
+        }
+        let requireIdentifier = requireCall.expression;
+        if (!libts.isIdentifier(requireIdentifier)) {
+            return node;
+        }
+        if (requireIdentifier.getText() !== "require") {
+            return node;
+        }
+        let requireArguments = requireCall.arguments;
+        if (requireArguments.length !== 1) {
+            return node;
+        }
+        let requireArgument = requireArguments[0];
+        if (!libts.isStringLiteral(requireArgument)) {
+            return node;
+        }
+        if (DEBUG)
+            console.log("esmExportStarFromImportStarRequire", requireArgument.getText());
+        return factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(exportIdentifier), requireArgument);
+    }
+    exports.esmExportStarFromImportStarRequire = esmExportStarFromImportStarRequire;
+    ;
 });
 define("bundler", ["require", "exports", "typescript", "is", "transformers"], function (require, exports, libts, is, transformers) {
     "use strict";
@@ -249,6 +316,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                                 node = transformers.esmExportFromCjsRequire(node, factory);
                                 node = transformers.esmExportStarFromExportStarRequire(node, factory);
                                 node = transformers.esmImportStarFromImportStarRequire(node, factory);
+                                node = transformers.esmExportStarFromImportStarRequire(node, factory);
                                 return node;
                             }, context);
                         }
