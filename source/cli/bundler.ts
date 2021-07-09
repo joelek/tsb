@@ -19,6 +19,7 @@ function createTransformers(): libts.CustomTransformers {
 							node = transformers.esmExportFromCjsRequire(node, factory);
 							node = transformers.esmExportStarFromExportStarRequire(node, factory);
 							node = transformers.esmImportStarFromImportStarRequire(node, factory);
+							node = transformers.esmExportStarFromImportStarRequire(node, factory);
 							return node;
 						}, context);
 					}

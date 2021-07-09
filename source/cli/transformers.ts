@@ -231,3 +231,74 @@ export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 		requireArgument
 	);
 };
+
+// Transforms `exports.<export> = __importStar(require(<path>));` into `export * as <export> from <path>;`.
+export function esmExportStarFromImportStarRequire(node: libts.Node, factory: libts.NodeFactory): libts.Node {
+	if (!libts.isExpressionStatement(node)) {
+		return node;
+	}
+	let expression = node.expression;
+	if (!libts.isBinaryExpression(expression)) {
+		return node;
+	}
+	if (expression.operatorToken.kind !== libts.SyntaxKind.EqualsToken) {
+		return node;
+	}
+	let exportsExpression = expression.left;
+	if (!libts.isPropertyAccessExpression(exportsExpression)) {
+		return node;
+	}
+	let exportsIdentifier = exportsExpression.expression;
+	if (!libts.isIdentifier(exportsIdentifier)) {
+		return node;
+	}
+	if (exportsIdentifier.getText() !== "exports") {
+		return node;
+	}
+	let exportIdentifier = exportsExpression.name;
+	if (!libts.isIdentifier(exportIdentifier)) {
+		return node;
+	}
+	let importStarCall = expression.right;
+	if (!libts.isCallExpression(importStarCall)) {
+		return node;
+	}
+	let importStarIdentifier = importStarCall.expression;
+	if (!libts.isIdentifier(importStarIdentifier)) {
+		return node;
+	}
+	if (importStarIdentifier.getText() !== "__importStar") {
+		return node;
+	}
+	let importStarArguments = importStarCall.arguments;
+	if (importStarArguments.length !== 1) {
+		return node;
+	}
+	let requireCall = importStarArguments[0];
+	if (!libts.isCallExpression(requireCall)) {
+		return node;
+	}
+	let requireIdentifier = requireCall.expression;
+	if (!libts.isIdentifier(requireIdentifier)) {
+		return node;
+	}
+	if (requireIdentifier.getText() !== "require") {
+		return node;
+	}
+	let requireArguments = requireCall.arguments;
+	if (requireArguments.length !== 1) {
+		return node;
+	}
+	let requireArgument = requireArguments[0];
+	if (!libts.isStringLiteral(requireArgument)) {
+		return node;
+	}
+	if (DEBUG) console.log("esmExportStarFromImportStarRequire", requireArgument.getText());
+	return factory.createExportDeclaration(
+		undefined,
+		undefined,
+		false,
+		factory.createNamespaceExport(exportIdentifier),
+		requireArgument
+	);
+};
