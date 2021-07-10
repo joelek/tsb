@@ -72,9 +72,13 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (options.debug)
-            console.log("esmImportStarFromImportStarRequire", requireArgument.getText());
-        return factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(importIdentifier)), requireArgument);
+        let newNode = factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(factory.createIdentifier(importIdentifier.getText()))), factory.createStringLiteralFromNode(requireArgument));
+        if (options.debug) {
+            console.log(`Transformed:`);
+            console.log(`\t${node.getText()}`);
+            console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+        }
+        return newNode;
     }
     exports.esmImportStarFromImportStarRequire = esmImportStarFromImportStarRequire;
     ;
@@ -124,9 +128,13 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (exportsIdentifier.getText() !== "exports") {
             return node;
         }
-        if (options.debug)
-            console.log("esmExportStarFromExportStarRequire", requireArgument.getText());
-        return factory.createExportDeclaration(undefined, undefined, false, undefined, requireArgument);
+        let newNode = factory.createExportDeclaration(undefined, undefined, false, undefined, factory.createStringLiteralFromNode(requireArgument));
+        if (options.debug) {
+            console.log(`Transformed:`);
+            console.log(`\t${node.getText()}`);
+            console.log(`\texport * from ${requireArgument.getText()};`);
+        }
+        return newNode;
     }
     exports.esmExportStarFromExportStarRequire = esmExportStarFromExportStarRequire;
     ;
@@ -168,9 +176,13 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (options.debug)
-            console.log("esmImportFromCjsRequire", requireArgument.getText());
-        return factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(importIdentifier)), requireArgument);
+        let newNode = factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(factory.createIdentifier(importIdentifier.getText()))), factory.createStringLiteralFromNode(requireArgument));
+        if (options.debug) {
+            console.log(`Transformed:`);
+            console.log(`\t${node.getText()}`);
+            console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+        }
+        return newNode;
     }
     exports.esmImportFromCjsRequire = esmImportFromCjsRequire;
     ;
@@ -220,9 +232,13 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (options.debug)
-            console.log("esmExportFromCjsRequire", requireArgument.getText());
-        return factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(exportIdentifier), requireArgument);
+        let newNode = factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(factory.createIdentifier(exportIdentifier.getText())), factory.createStringLiteralFromNode(requireArgument));
+        if (options.debug) {
+            console.log(`Transformed:`);
+            console.log(`\t${node.getText()}`);
+            console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+        }
+        return newNode;
     }
     exports.esmExportFromCjsRequire = esmExportFromCjsRequire;
     ;
@@ -287,9 +303,13 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
         if (!libts.isStringLiteral(requireArgument)) {
             return node;
         }
-        if (options.debug)
-            console.log("esmExportStarFromImportStarRequire", requireArgument.getText());
-        return factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(exportIdentifier), requireArgument);
+        let newNode = factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(factory.createIdentifier(exportIdentifier.getText())), factory.createStringLiteralFromNode(requireArgument));
+        if (options.debug) {
+            console.log(`Transformed:`);
+            console.log(`\t${node.getText()}`);
+            console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+        }
+        return newNode;
     }
     exports.esmExportStarFromImportStarRequire = esmExportStarFromImportStarRequire;
     ;
@@ -351,8 +371,12 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                 if (is.present(packageId) && (packageId.name in dependencies)) {
                     isExternalLibraryImport = true;
                 }
-                if (options.debug)
-                    console.log(`Resolved "${moduleName}" to "${resolvedFileName}" (${isExternalLibraryImport ? "external" : "internal"})`);
+                if (options.debug) {
+                    console.log(`Resolved:`);
+                    console.log(`\t"${moduleName}"`);
+                    console.log(`\t"${resolvedFileName}"`);
+                    console.log(`\t(${isExternalLibraryImport ? "external" : "internal"})`);
+                }
                 return {
                     resolvedFileName,
                     isExternalLibraryImport

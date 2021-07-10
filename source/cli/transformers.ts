@@ -55,17 +55,24 @@ export function esmImportStarFromImportStarRequire(node: libts.Node, factory: li
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (options.debug) console.log("esmImportStarFromImportStarRequire", requireArgument.getText());
-	return factory.createImportDeclaration(
+	let newNode = factory.createImportDeclaration(
 		undefined,
 		undefined,
 		factory.createImportClause(
 			false,
 			undefined,
-			factory.createNamespaceImport(importIdentifier)
+			factory.createNamespaceImport(
+				factory.createIdentifier(importIdentifier.getText())
+			)
 		),
-		requireArgument
+		factory.createStringLiteralFromNode(requireArgument)
 	);
+	if (options.debug) {
+		console.log(`Transformed:`);
+		console.log(`\t${node.getText()}`);
+		console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+	}
+	return newNode;
 };
 
 // Transforms `__exportStar(require(<path>), exports);` into `export * from <path>;`.
@@ -114,14 +121,19 @@ export function esmExportStarFromExportStarRequire(node: libts.Node, factory: li
 	if (exportsIdentifier.getText() !== "exports") {
 		return node;
 	}
-	if (options.debug) console.log("esmExportStarFromExportStarRequire", requireArgument.getText());
-	return factory.createExportDeclaration(
+	let newNode = factory.createExportDeclaration(
 		undefined,
 		undefined,
 		false,
 		undefined,
-		requireArgument
+		factory.createStringLiteralFromNode(requireArgument)
 	);
+	if (options.debug) {
+		console.log(`Transformed:`);
+		console.log(`\t${node.getText()}`);
+		console.log(`\texport * from ${requireArgument.getText()};`);
+	}
+	return newNode;
 };
 
 // Transforms `var/let/const <import> = require(<path>);` into `import * as <import> from <path>;`.
@@ -162,17 +174,24 @@ export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (options.debug) console.log("esmImportFromCjsRequire", requireArgument.getText());
-	return factory.createImportDeclaration(
+	let newNode = factory.createImportDeclaration(
 		undefined,
 		undefined,
 		factory.createImportClause(
 			false,
 			undefined,
-			factory.createNamespaceImport(importIdentifier)
+			factory.createNamespaceImport(
+				factory.createIdentifier(importIdentifier.getText())
+			)
 		),
-		requireArgument
+		factory.createStringLiteralFromNode(requireArgument)
 	);
+	if (options.debug) {
+		console.log(`Transformed:`);
+		console.log(`\t${node.getText()}`);
+		console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+	}
+	return newNode;
 };
 
 // Transforms `exports.<export> = require(<path>);` into `export * as <export> from <path>;`.
@@ -221,14 +240,21 @@ export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (options.debug) console.log("esmExportFromCjsRequire", requireArgument.getText());
-	return factory.createExportDeclaration(
+	let newNode = factory.createExportDeclaration(
 		undefined,
 		undefined,
 		false,
-		factory.createNamespaceExport(exportIdentifier),
-		requireArgument
+		factory.createNamespaceExport(
+			factory.createIdentifier(exportIdentifier.getText())
+		),
+		factory.createStringLiteralFromNode(requireArgument)
 	);
+	if (options.debug) {
+		console.log(`Transformed:`);
+		console.log(`\t${node.getText()}`);
+		console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+	}
+	return newNode;
 };
 
 // Transforms `exports.<export> = __importStar(require(<path>));` into `export * as <export> from <path>;`.
@@ -292,12 +318,19 @@ export function esmExportStarFromImportStarRequire(node: libts.Node, factory: li
 	if (!libts.isStringLiteral(requireArgument)) {
 		return node;
 	}
-	if (options.debug) console.log("esmExportStarFromImportStarRequire", requireArgument.getText());
-	return factory.createExportDeclaration(
+	let newNode = factory.createExportDeclaration(
 		undefined,
 		undefined,
 		false,
-		factory.createNamespaceExport(exportIdentifier),
-		requireArgument
+		factory.createNamespaceExport(
+			factory.createIdentifier(exportIdentifier.getText())
+		),
+		factory.createStringLiteralFromNode(requireArgument)
 	);
+	if (options.debug) {
+		console.log(`Transformed:`);
+		console.log(`\t${node.getText()}`);
+		console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+	}
+	return newNode;
 };

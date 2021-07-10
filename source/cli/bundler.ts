@@ -55,7 +55,12 @@ function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, op
 			if (is.present(packageId) && (packageId.name in dependencies)) {
 				isExternalLibraryImport = true;
 			}
-			if (options.debug) console.log(`Resolved "${moduleName}" to "${resolvedFileName}" (${isExternalLibraryImport ? "external" : "internal"})`);
+			if (options.debug) {
+				console.log(`Resolved:`);
+				console.log(`\t"${moduleName}"`);
+				console.log(`\t"${resolvedFileName}"`);
+				console.log(`\t(${isExternalLibraryImport ? "external" : "internal"})`);
+			}
 			return {
 				resolvedFileName,
 				isExternalLibraryImport
