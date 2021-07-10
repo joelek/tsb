@@ -328,6 +328,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
         var _a;
         let dependencies = (_a = pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) !== null && _a !== void 0 ? _a : {};
         let host = libts.createCompilerHost(compilerOptions);
+        let declarationFiles = new Array();
         host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
             return moduleNames.map((moduleName) => {
                 let result = libts.resolveModuleName(moduleName, containingFile, compilerOptions, libts.sys);
@@ -341,6 +342,10 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                     let resolvedFileNameJs = resolvedFileName.slice(0, -5) + `.js`;
                     if (host.fileExists(resolvedFileNameJs)) {
                         resolvedFileName = resolvedFileNameJs;
+                    }
+                    else {
+                        declarationFiles.push(moduleName);
+                        return;
                     }
                 }
                 if (is.present(packageId) && (packageId.name in dependencies)) {
@@ -372,6 +377,9 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
             return output.outputText;
         };
         host.writeFile = (filename, data) => {
+            for (let declarationFile of declarationFiles) {
+                data += `define("${declarationFile}", [], function () {});\n`;
+            }
             data = data + DEFINE;
             libts.sys.writeFile(filename, data);
         };

@@ -33,6 +33,7 @@ function createTransformers(options: shared.Options): libts.CustomTransformers {
 function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, options: shared.Options): libts.CompilerHost {
 	let dependencies = pkg?.dependencies ?? {};
 	let host = libts.createCompilerHost(compilerOptions);
+	let declarationFiles = new Array<string>();
 	host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
 		return moduleNames.map((moduleName) => {
 			let result = libts.resolveModuleName(moduleName, containingFile, compilerOptions, libts.sys);
@@ -46,6 +47,9 @@ function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, op
 				let resolvedFileNameJs = resolvedFileName.slice(0, -5) + `.js`;
 				if (host.fileExists(resolvedFileNameJs)) {
 					resolvedFileName = resolvedFileNameJs;
+				} else {
+					declarationFiles.push(moduleName);
+					return;
 				}
 			}
 			if (is.present(packageId) && (packageId.name in dependencies)) {
@@ -76,6 +80,9 @@ function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, op
 		return output.outputText;
 	};
 	host.writeFile = (filename, data) => {
+		for (let declarationFile of declarationFiles) {
+			data += `define("${declarationFile}", [], function () {});\n`;
+		}
 		data = data + DEFINE;
 		libts.sys.writeFile(filename, data);
 	};
