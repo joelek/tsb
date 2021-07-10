@@ -17,12 +17,16 @@ type ModuleState = {
 type Define = {
 	(name: string, dependencies: Array<string>, callback: ModuleCallback): void;
 	moduleStates: Map<string, ModuleState>;
+	dependentsMap: Map<string, Set<string>>;
 };
 
 function define(name: string, dependencies: Array<string>, callback: ModuleCallback): void {
 	let self = define as Define;
 	if (self.moduleStates == null) {
 		self.moduleStates = new Map<string, ModuleState>();
+	}
+	if (self.dependentsMap == null) {
+		self.dependentsMap = new Map<string, Set<string>>();
 	}
 	function req(name: string): any {
 		return require(name);
@@ -61,13 +65,16 @@ function define(name: string, dependencies: Array<string>, callback: ModuleCallb
 		}
 		moduleState.callback(...exports);
 		moduleState.module = module;
-		for (let dependency of moduleState.dependencies) {
-			resolve(dependency);
+		let dependents = self.dependentsMap.get(name);
+		if (dependents != null) {
+			for (let dependent of dependents) {
+				resolve(dependent);
+			}
 		}
 	}
 	let moduleState = self.moduleStates.get(name);
 	if (moduleState != null) {
-		throw "Duplicate module found with name \"" + name + "\"!";
+		throw "Duplicate module found with name " + name + "!";
 	}
 	moduleState = {
 		callback: callback,
@@ -75,5 +82,13 @@ function define(name: string, dependencies: Array<string>, callback: ModuleCallb
 		module: null
 	};
 	self.moduleStates.set(name, moduleState);
+	for (let dependency of dependencies) {
+		let dependents = self.dependentsMap.get(dependency);
+		if (dependents == null) {
+			dependents = new Set<string>();
+			self.dependentsMap.set(dependency, dependents);
+		}
+		dependents.add(name);
+	}
 	resolve(name);
 }
