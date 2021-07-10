@@ -58,6 +58,39 @@ The module system is configured based on the file ending of the script file pass
 }
 ```
 
+It is important to understand that the module resolution algorithm will change with the module system used.
+
+The NodeJS module resolution algorithm will automatically attempt to append a `.js` suffix to the module specifier as part of the algorithm when using CommonJS modules. This is not done when using ECMAScript modules.
+
+CommonJS file "imports" like `const module = require("./relative-specifier");` will break when switching to ECMAScript modules like `import * as module from "./relative-specifier";` unless the file extension is specified.
+
+In addition, directory "imports" are supported when using CommonJS modules in NodeJS whereas they are unsupported when using ECMAScript modules.
+
+### TypeScript
+
+The TypeScript compiler can emit JavaScript files with the CommonJS module system by setting the `module` compiler option to `commonjs` in `tsconfig.json`.
+
+```json
+{
+	"compilerOptions": {
+		"module": "commonjs"
+	}
+}
+```
+
+The TypeScript compiler can emit JavaScript files with the ECMAScript module system by setting the `module` compiler option to `esnext` in `tsconfig.json`.
+
+It is recommended to also set the `esModuleInterop` setting to `true` as this simplifies importing CommonJS modules from within ECMAScript modules.
+
+```json
+{
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"module": "esnext"
+	}
+}
+```
+
 ## Features
 
 ### Standalone bundling
@@ -73,6 +106,8 @@ npx tsb --entry=<path> --bundle=<path>
 Dependencies listed under the "devDependencies" section of the "package.json" file will be treated as compile-time dependencies and will be included in the bundle.
 
 Dependencies listed under the "dependencies" section of the "package.json" file will be treated as run-time dependencies and will not be included in the bundle.
+
+CommonJS and ECMAScript modules are supported and can be mixed but module specifiers are required to be compatible with the NodeJS module resolution algorithm.
 
 A loader with a size less than 1 kB will automatically be included in the bundle.
 
