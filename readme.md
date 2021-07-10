@@ -22,6 +22,42 @@ The TypeScript compiler includes limited support for bundling. It can produce bu
 
 This tool leverages the TypeScript compiler to produce standalone bundles from JavaScript files.
 
+## Module systems
+
+Writing software at scale requires modularity and re-usability for which module systems can be of great assistance.
+
+Several module systems have been proposed and used within the JavaScript ecosystem. Two notable module systems that are still widely used are the CommonJS module system (CJS) and the ECMAScript module system (ESM/MJS).
+
+### CommonJS
+
+The CommonJS module system origins from the NodeJS ecosystem. Imports are performed using the presumedly built-in `require()` function while exports are handled using the presumedly implicitly-defined, module-scoped `module` and `exports` variables. The system lacks functionality for partially importing modules but does allow for fine-grained control over the exports of a module.
+
+CommonJS modules work great inside the NodeJS ecosystem but are not widely-supported elsewhere, specifically not in browser contexts. A loader or bundler is required in order to support CommonJS modules in a browser context.
+
+### ECMAScript
+
+The ECMAScript module system origins from a standardization effort for JavaScript modules addressing several shortcomings while also introducing new functionality. Imports and exports are performed using the `import` and `export` expressions, respectively.
+
+Adoption and support for the ECMAScript module system is bound to increase and improve over time as it is the standardized module system for the JavaScript ecosystem.
+
+### NodeJS
+
+NodeJS can be configured to load modules either using the CommonJS module system or using the ECMAScript module system. It does not support mixing modules from both systems from within the same process.
+
+The module system is configured based on the file ending of the script file passed when launching NodeJS. Files ending in `.cjs` will configure NodeJS with the CommonJS module system while files ending in `.mjs` will configure NodeJS with the ECMAScript module system. Files ending in `.js` will configure NodeJS using the `type` setting from the corresponding `package.json` file if present and default to CommonJS when left unspecified.
+
+```json
+{
+	"type": "commonjs"
+}
+```
+
+```json
+{
+	"type": "module"
+}
+```
+
 ## Features
 
 ### Standalone bundling
@@ -66,5 +102,4 @@ NB: This project targets TypeScript 4 in strict mode.
 
 ## Roadmap
 
-* Write help section about module systems.
 * Extract library functions into separate subproject.
