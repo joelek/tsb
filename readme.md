@@ -66,5 +66,6 @@ NB: This project targets TypeScript 4 in strict mode.
 
 ## Roadmap
 
+* Write loader that supports out of order module defines.
+* Write help section about module systems.
 * Extract library functions into separate subproject.
-* Add better support for legacy import expressions.
