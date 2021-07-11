@@ -42,9 +42,11 @@ Adoption and support for the ECMAScript module system is bound to increase and i
 
 ### NodeJS
 
-NodeJS can be configured to load modules either using the CommonJS module system or using the ECMAScript module system. It does not support mixing modules from both systems from within the same process.
+NodeJS can be configured to load modules either using the CommonJS module system or using the ECMAScript module system.
 
-The module system is configured based on the file ending of the script file passed when launching NodeJS. Files ending in `.cjs` will configure NodeJS with the CommonJS module system while files ending in `.mjs` will configure NodeJS with the ECMAScript module system. Files ending in `.js` will configure NodeJS using the `type` setting from the corresponding `package.json` file if present and default to CommonJS when left unspecified.
+The module system is configured based on the file ending of the script file passed when launching NodeJS. Files ending in `.cjs` will configure NodeJS with the CommonJS module system while files ending in `.mjs` will configure NodeJS with the ECMAScript module system.
+
+Files ending in `.js` will configure NodeJS using the `type` setting from the corresponding `package.json` file if present and will default to CommonJS when left unspecified.
 
 ```json
 {
