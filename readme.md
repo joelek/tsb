@@ -26,25 +26,33 @@ This tool leverages the TypeScript compiler to produce standalone bundles from J
 
 Writing software at scale requires modularity and re-usability for which module systems can be of great assistance.
 
-Several module systems have been proposed and used within the JavaScript ecosystem. Two notable module systems that are still widely used are the CommonJS module system (CJS) and the ECMAScript module system (ESM/MJS).
+Several module systems have been proposed and used within the JavaScript ecosystem of which two notable ones are still widely used.
 
 ### CommonJS
 
-The CommonJS module system origins from the NodeJS ecosystem. Imports are performed using the presumedly built-in `require()` function while exports are handled using the presumedly implicitly-defined, module-scoped `module` and `exports` variables. The system lacks functionality for partially importing modules but does allow for fine-grained control over the exports of a module.
+The CommonJS module system origins from the NodeJS ecosystem. Imports are performed using the built-in `require()` function while exports are handled using the implicitly-defined, module-scoped `module` and `exports` variables.
 
-CommonJS modules work great inside the NodeJS ecosystem but are not widely-supported elsewhere, specifically not in browser contexts. A loader or bundler is required in order to support CommonJS modules in a browser context.
+The system lacks functionality for partially importing modules but does allow for fine-grained control over the exports of a module.
+
+CommonJS modules work great inside the NodeJS ecosystem but are not widely-supported elsewhere, specifically not in browser contexts.
+
+A loader or bundler is required in order to support CommonJS modules in a browser context.
 
 ### ECMAScript
 
-The ECMAScript module system origins from a standardization effort for JavaScript modules addressing several shortcomings while also introducing new functionality. Imports and exports are performed using the `import` and `export` expressions, respectively.
+The ECMAScript module system origins from a standardization effort for JavaScript modules addressing several shortcomings of CommonJS while also introducing new functionality.
+
+Imports and exports are performed using the `import` and `export` expressions, respectively. These expressions give fine-grained control over both the imports and exports of a module.
 
 Adoption and support for the ECMAScript module system is bound to increase and improve over time as it is the standardized module system for the JavaScript ecosystem.
 
-### NodeJS
+### Usage in NodeJS
 
 NodeJS can be configured to load modules either using the CommonJS module system or using the ECMAScript module system.
 
-The module system is configured based on the file ending of the script file passed when launching NodeJS. Files ending in `.cjs` will configure NodeJS with the CommonJS module system while files ending in `.mjs` will configure NodeJS with the ECMAScript module system.
+The module system is configured based on the file ending of the script file passed when launching NodeJS.
+
+Files ending in `.cjs` will configure NodeJS with the CommonJS module system while files ending in `.mjs` will configure NodeJS with the ECMAScript module system.
 
 Files ending in `.js` will configure NodeJS using the `type` setting from the corresponding `package.json` file if present and will default to CommonJS when left unspecified.
 
