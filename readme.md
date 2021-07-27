@@ -103,9 +103,9 @@ It is recommended to also set the `esModuleInterop` setting to `true` as this si
 
 ## Features
 
-### Standalone bundling
-
 This tool can be installed locally or globally. Use the `npx tsb` command for local installations and the `tsb` command for global installations.
+
+### Standalone bundling
 
 Specify the path of the entry point as well as the desired path of the bundle using the "--entry" and "--bundle" arguments, respectively.
 
@@ -134,13 +134,13 @@ Thank you for your support!
 Releases follow semantic versioning and release packages are published using the GitHub platform. Use the following command to install the latest release.
 
 ```
-npm install joelek/ts-bundle#semver:^0
+npm install [-g] joelek/ts-bundle#semver:^0
 ```
 
 Use the following command to install the very latest build. The very latest build may include breaking changes and should not be used in production environments.
 
 ```
-npm install joelek/ts-bundle#master
+npm install [-g] joelek/ts-bundle#master
 ```
 
 NB: This project targets TypeScript 4 in strict mode.
