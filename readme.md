@@ -113,9 +113,9 @@ Specify the path of the entry point as well as the desired path of the bundle us
 npx tsb --entry=<path> --bundle=<path>
 ```
 
-Dependencies referenced from the entry point and listed under the "dependencies" section of the "package.json" file will be treated as run-time dependencies and will not be included in the bundle.
+Dependencies referenced from the entry point and listed under the "dependencies" section of the "package.json" file will be treated as run-time dependencies and will not be included in the bundle. This behaviour may be controlled using the `--dependencies` argument.
 
-Dependencies referenced from the entry point and listed under the "devDependencies" section of the "package.json" file will be treated as compile-time dependencies and will be included in the bundle.
+Dependencies referenced from the entry point and listed under the "devDependencies" section of the "package.json" file will be treated as compile-time dependencies and will be included in the bundle. This behaviour may be controlled using the `--dev-dependencies` argument.
 
 CommonJS and ECMAScript modules are supported and can be mixed but module specifiers are required to be compatible with the NodeJS module resolution algorithm.
 
