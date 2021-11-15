@@ -345,8 +345,9 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
         };
     }
     function createCompilerHost(compilerOptions, pkg, options) {
-        var _a;
+        var _a, _b;
         let dependencies = (_a = pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) !== null && _a !== void 0 ? _a : {};
+        let devDependencies = (_b = pkg === null || pkg === void 0 ? void 0 : pkg.devDependencies) !== null && _b !== void 0 ? _b : {};
         let host = libts.createCompilerHost(compilerOptions);
         let declarationFiles = new Array();
         host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
@@ -368,8 +369,13 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                         return;
                     }
                 }
-                if (is.present(packageId) && (packageId.name in dependencies)) {
-                    isExternalLibraryImport = true;
+                if (is.present(packageId)) {
+                    if (packageId.name in dependencies && !options.dependencies) {
+                        isExternalLibraryImport = true;
+                    }
+                    if (packageId.name in devDependencies && !options.devDependencies) {
+                        isExternalLibraryImport = true;
+                    }
                 }
                 if (options.debug) {
                     console.log(`Resolved:`);
@@ -461,7 +467,7 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
     function run() {
-        var _a;
+        var _a, _b, _c;
         let options = {};
         let foundUnrecognizedArgument = false;
         for (let argv of process.argv.slice(2)) {
@@ -477,6 +483,12 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
             else if ((parts = /^--debug=(true|false)$/.exec(argv)) != null) {
                 options.debug = parts[1] === "true";
             }
+            else if ((parts = /^--dependencies=(true|false)$/.exec(argv)) != null) {
+                options.dependencies = parts[1] === "true";
+            }
+            else if ((parts = /^--dev-dependencies=(true|false)$/.exec(argv)) != null) {
+                options.devDependencies = parts[1] === "true";
+            }
             else {
                 foundUnrecognizedArgument = true;
                 process.stderr.write(`Unrecognized argument \"${argv}\"!\n`);
@@ -485,6 +497,8 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
         let entry = options.entry;
         let bundle = options.bundle;
         let debug = (_a = options.debug) !== null && _a !== void 0 ? _a : false;
+        let dependencies = (_b = options.dependencies) !== null && _b !== void 0 ? _b : false;
+        let devDependencies = (_c = options.devDependencies) !== null && _c !== void 0 ? _c : true;
         if (foundUnrecognizedArgument || is.absent(entry) || is.absent(bundle)) {
             process.stderr.write(`Arguments:\n`);
             process.stderr.write(`	--entry=string\n`);
@@ -493,13 +507,19 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
             process.stderr.write(`		Set bundle (output file) for bundling.\n`);
             process.stderr.write(`	--debug=boolean\n`);
             process.stderr.write(`		Set debug mode.\n`);
+            process.stderr.write(`	--dependencies=boolean\n`);
+            process.stderr.write(`		Configure bundling of dependencies listed under "dependencies".\n`);
+            process.stderr.write(`	--dev-dependencies=boolean\n`);
+            process.stderr.write(`		Configure bundling of dependencies listed under "devDependencies".\n`);
             return 1;
         }
         try {
             bundler.bundle({
                 entry,
                 bundle,
-                debug
+                debug,
+                dependencies,
+                devDependencies
             });
             return 0;
         }
