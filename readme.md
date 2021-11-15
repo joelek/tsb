@@ -107,15 +107,15 @@ This tool can be installed locally or globally. Use the `npx tsb` command for lo
 
 ### Standalone bundling
 
-Specify the path of the entry point as well as the desired path of the bundle using the "--entry" and "--bundle" arguments, respectively.
+Specify the path of the entry point as well as the desired path of the bundle using the `--entry` and `--bundle` arguments, respectively.
 
 ```
 npx tsb --entry=<path> --bundle=<path>
 ```
 
-Dependencies listed under the "devDependencies" section of the "package.json" file will be treated as compile-time dependencies and will be included in the bundle.
+Dependencies referenced from the entry point and listed under the "dependencies" section of the "package.json" file will be treated as run-time dependencies and will not be included in the bundle.
 
-Dependencies listed under the "dependencies" section of the "package.json" file will be treated as run-time dependencies and will not be included in the bundle.
+Dependencies referenced from the entry point and listed under the "devDependencies" section of the "package.json" file will be treated as compile-time dependencies and will be included in the bundle.
 
 CommonJS and ECMAScript modules are supported and can be mixed but module specifiers are required to be compatible with the NodeJS module resolution algorithm.
 
