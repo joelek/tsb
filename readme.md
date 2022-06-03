@@ -2,6 +2,10 @@
 
 JavaScript bundler powered by the TypeScript compiler.
 
+```
+npx tsb --entry=<path> --bundle=<path>
+```
+
 ## Background
 
 The TypeScript compiler is incredibly versatile. It supports a wide variety of different script targets, module systems and includes compiler settings for almost every use-case.
