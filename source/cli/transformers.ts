@@ -334,3 +334,43 @@ export function esmExportStarFromImportStarRequire(node: libts.Node, factory: li
 	}
 	return newNode;
 };
+
+// Transforms `require(<path>);` into `import <path>;`.
+export function esmSideEffectsImportFromCjsRequire(node: libts.Node, factory: libts.NodeFactory, options: shared.Options): libts.Node {
+	if (!libts.isExpressionStatement(node)) {
+		return node;
+	}
+	let expressionStatement = node;
+	let expression = expressionStatement.expression;
+	if (!libts.isCallExpression(expression)) {
+		return node;
+	}
+	let requireCall = expression;
+	let requireIdentifier = requireCall.expression;
+	if (!libts.isIdentifier(requireIdentifier)) {
+		return node;
+	}
+	if (requireIdentifier.getText() !== "require") {
+		return node;
+	}
+	let requireArguments = requireCall.arguments;
+	if (requireArguments.length !== 1) {
+		return node;
+	}
+	let requireArgument = requireArguments[0];
+	if (!libts.isStringLiteral(requireArgument)) {
+		return node;
+	}
+	let newNode = factory.createImportDeclaration(
+		undefined,
+		undefined,
+		undefined,
+		factory.createStringLiteralFromNode(requireArgument)
+	);
+	if (options.debug) {
+		console.log(`Transformed:`);
+		console.log(`\t${node.getText()}`);
+		console.log(`\timport ${requireArgument.getText()};`);
+	}
+	return newNode;
+};

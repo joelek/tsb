@@ -21,6 +21,7 @@ function createTransformers(options: shared.Options): libts.CustomTransformers {
 							node = transformers.esmExportStarFromExportStarRequire(node, factory, options);
 							node = transformers.esmImportStarFromImportStarRequire(node, factory, options);
 							node = transformers.esmExportStarFromImportStarRequire(node, factory, options);
+							node = transformers.esmSideEffectsImportFromCjsRequire(node, factory, options);
 							return node;
 						}, context);
 					}
