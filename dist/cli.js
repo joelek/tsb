@@ -18,7 +18,7 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.esmExportStarFromImportStarRequire = exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = exports.esmExportStarFromExportStarRequire = exports.esmImportStarFromImportStarRequire = void 0;
+    exports.esmSideEffectsImportFromCjsRequire = exports.esmExportStarFromImportStarRequire = exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = exports.esmExportStarFromExportStarRequire = exports.esmImportStarFromImportStarRequire = void 0;
     // Transforms `var/let/const <import> = __importStar(require(<path>));` into `import * as <import> from <path>;`.
     function esmImportStarFromImportStarRequire(node, factory, options) {
         if (!libts.isVariableStatement(node)) {
@@ -313,6 +313,42 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
     }
     exports.esmExportStarFromImportStarRequire = esmExportStarFromImportStarRequire;
     ;
+    // Transforms `require(<path>);` into `import <path>;`.
+    function esmSideEffectsImportFromCjsRequire(node, factory, options) {
+        if (!libts.isExpressionStatement(node)) {
+            return node;
+        }
+        let expressionStatement = node;
+        let expression = expressionStatement.expression;
+        if (!libts.isCallExpression(expression)) {
+            return node;
+        }
+        let requireCall = expression;
+        let requireIdentifier = requireCall.expression;
+        if (!libts.isIdentifier(requireIdentifier)) {
+            return node;
+        }
+        if (requireIdentifier.getText() !== "require") {
+            return node;
+        }
+        let requireArguments = requireCall.arguments;
+        if (requireArguments.length !== 1) {
+            return node;
+        }
+        let requireArgument = requireArguments[0];
+        if (!libts.isStringLiteral(requireArgument)) {
+            return node;
+        }
+        let newNode = factory.createImportDeclaration(undefined, undefined, undefined, factory.createStringLiteralFromNode(requireArgument));
+        if (options.debug) {
+            console.log(`Transformed:`);
+            console.log(`\t${node.getText()}`);
+            console.log(`\timport ${requireArgument.getText()};`);
+        }
+        return newNode;
+    }
+    exports.esmSideEffectsImportFromCjsRequire = esmSideEffectsImportFromCjsRequire;
+    ;
 });
 define("bundler", ["require", "exports", "typescript", "is", "transformers"], function (require, exports, libts, is, transformers) {
     "use strict";
@@ -336,6 +372,7 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
                                 node = transformers.esmExportStarFromExportStarRequire(node, factory, options);
                                 node = transformers.esmImportStarFromImportStarRequire(node, factory, options);
                                 node = transformers.esmExportStarFromImportStarRequire(node, factory, options);
+                                node = transformers.esmSideEffectsImportFromCjsRequire(node, factory, options);
                                 return node;
                             }, context);
                         }
