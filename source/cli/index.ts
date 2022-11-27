@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 
 import * as app from "../app.json";
-import * as bundler from "./bundler";
-import * as is from "./is";
-import * as shared from "./shared";
+import * as lib from "../lib/";
 
 function run(): number {
-	let options: Partial<shared.Options> = {};
+	let options: Partial<lib.Options> = {};
 	let unrecognizedArguments = [] as Array<string>;
 	for (let arg of process.argv.slice(2)) {
 		let parts: RegExpExecArray | null = null;
@@ -30,7 +28,7 @@ function run(): number {
 	let debug = options.debug ?? false;
 	let dependencies = options.dependencies ?? false;
 	let devDependencies = options.devDependencies ?? true;
-	if (unrecognizedArguments.length > 0 || is.absent(entry) || is.absent(bundle)) {
+	if (unrecognizedArguments.length > 0 || entry == null || bundle == null) {
 		process.stderr.write(`${app.name} v${app.version}\n`);
 		process.stderr.write(`\n`);
 		for (let unrecognizedArgument of unrecognizedArguments) {
@@ -51,7 +49,7 @@ function run(): number {
 		return 1;
 	}
 	try {
-		bundler.bundle({
+		lib.bundle({
 			entry,
 			bundle,
 			debug,

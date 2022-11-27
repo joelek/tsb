@@ -9,6 +9,7 @@
 		"@types/node": "^16.7"
 	},
 	"license": "MIT",
+	"main": "./dist/lib/index.js",
 	"name": "@joelek/ts-bundle",
 	"repository": {
 		"type": "git",
@@ -19,7 +20,7 @@
 		"build": "npm run appgen && npm run compile && npm run package && npm run test",
 		"clean": "rm -rf ./build/ ./node_modules/",
 		"compile": "rm -rf ./build/* && npx tsc --build",
-		"package": "rm -rf ./dist/* && node ./build/cli/index.js --debug=true --entry=./build/cli/index.js --bundle=./dist/cli.js",
+		"package": "rm -rf ./dist/* && cp -r ./build/* ./dist/ && node ./build/cli/index.js --debug=true --entry=./build/cli/index.js --bundle=./dist/cli.js",
 		"postversion": "npm run build && git add ./ && git commit --amend --no-edit && git push && git push --tags",
 		"test": ""
 	},

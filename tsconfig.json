@@ -12,6 +12,9 @@
 	"references": [
 		{
 			"path": "./source/cli/"
+		},
+		{
+			"path": "./source/lib/"
 		}
 	]
 }
