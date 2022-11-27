@@ -3,7 +3,7 @@ define("app", [], {
     "name": "@joelek/ts-bundle",
     "version": "1.3.0"
 });
-define("cli/is", ["require", "exports"], function (require, exports) {
+define("lib/is", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.present = exports.absent = void 0;
@@ -18,7 +18,7 @@ define("cli/is", ["require", "exports"], function (require, exports) {
     exports.present = present;
     ;
 });
-define("cli/transformers", ["require", "exports", "typescript", "cli/is"], function (require, exports, libts, is) {
+define("lib/transformers", ["require", "exports", "typescript", "lib/is"], function (require, exports, libts, is) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -354,7 +354,7 @@ define("cli/transformers", ["require", "exports", "typescript", "cli/is"], funct
     exports.esmSideEffectsImportFromCjsRequire = esmSideEffectsImportFromCjsRequire;
     ;
 });
-define("cli/bundler", ["require", "exports", "typescript", "cli/is", "cli/transformers"], function (require, exports, libts, is, transformers) {
+define("lib/index", ["require", "exports", "typescript", "lib/is", "lib/transformers"], function (require, exports, libts, is, transformers) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -503,7 +503,7 @@ define("cli/bundler", ["require", "exports", "typescript", "cli/is", "cli/transf
     exports.bundle = bundle;
     ;
 });
-define("cli/index", ["require", "exports", "app", "cli/bundler", "cli/is"], function (require, exports, app, bundler, is) {
+define("cli/index", ["require", "exports", "app", "lib/index"], function (require, exports, app, lib) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -539,7 +539,7 @@ define("cli/index", ["require", "exports", "app", "cli/bundler", "cli/is"], func
         let debug = (_a = options.debug) !== null && _a !== void 0 ? _a : false;
         let dependencies = (_b = options.dependencies) !== null && _b !== void 0 ? _b : false;
         let devDependencies = (_c = options.devDependencies) !== null && _c !== void 0 ? _c : true;
-        if (unrecognizedArguments.length > 0 || is.absent(entry) || is.absent(bundle)) {
+        if (unrecognizedArguments.length > 0 || entry == null || bundle == null) {
             process.stderr.write(`${app.name} v${app.version}\n`);
             process.stderr.write(`\n`);
             for (let unrecognizedArgument of unrecognizedArguments) {
@@ -560,7 +560,7 @@ define("cli/index", ["require", "exports", "app", "cli/bundler", "cli/is"], func
             return 1;
         }
         try {
-            bundler.bundle({
+            lib.bundle({
                 entry,
                 bundle,
                 debug,
