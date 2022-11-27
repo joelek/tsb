@@ -18,7 +18,38 @@ define("lib/is", ["require", "exports"], function (require, exports) {
     exports.present = present;
     ;
 });
-define("lib/transformers", ["require", "exports", "typescript", "lib/is"], function (require, exports, libts, is) {
+define("lib/terminal", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.stylize = exports.BG_WHITE = exports.BG_CYAN = exports.BG_MAGENTA = exports.BG_BLUE = exports.BG_YELLOW = exports.BG_GREEN = exports.BG_RED = exports.BG_BLACK = exports.FG_WHITE = exports.FG_CYAN = exports.FG_MAGENTA = exports.FG_BLUE = exports.FG_YELLOW = exports.FG_GREEN = exports.FG_RED = exports.FG_BLACK = exports.UNDERLINE = exports.ITALIC = exports.FAINT = exports.BOLD = exports.RESET = void 0;
+    exports.RESET = 0;
+    exports.BOLD = 1;
+    exports.FAINT = 2;
+    exports.ITALIC = 3;
+    exports.UNDERLINE = 4;
+    exports.FG_BLACK = 30;
+    exports.FG_RED = 31;
+    exports.FG_GREEN = 32;
+    exports.FG_YELLOW = 33;
+    exports.FG_BLUE = 34;
+    exports.FG_MAGENTA = 35;
+    exports.FG_CYAN = 36;
+    exports.FG_WHITE = 37;
+    exports.BG_BLACK = 40;
+    exports.BG_RED = 41;
+    exports.BG_GREEN = 42;
+    exports.BG_YELLOW = 43;
+    exports.BG_BLUE = 44;
+    exports.BG_MAGENTA = 45;
+    exports.BG_CYAN = 46;
+    exports.BG_WHITE = 47;
+    function stylize(string, ...parameters) {
+        return `\x1B[${parameters.join(";")}m` + string + `\x1B[${exports.RESET}m`;
+    }
+    exports.stylize = stylize;
+    ;
+});
+define("lib/transformers", ["require", "exports", "typescript", "lib/is", "lib/terminal"], function (require, exports, libts, is, terminal) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -78,9 +109,9 @@ define("lib/transformers", ["require", "exports", "typescript", "lib/is"], funct
         }
         let newNode = factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(factory.createIdentifier(importIdentifier.getText()))), factory.createStringLiteralFromNode(requireArgument));
         if (options.debug) {
-            console.log(`Transformed:`);
-            console.log(`\t${node.getText()}`);
-            console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+            let source = `${node.getText()}`;
+            let target = `import * as ${importIdentifier.getText()} from ${requireArgument.getText()};`;
+            console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
         }
         return newNode;
     }
@@ -134,9 +165,9 @@ define("lib/transformers", ["require", "exports", "typescript", "lib/is"], funct
         }
         let newNode = factory.createExportDeclaration(undefined, undefined, false, undefined, factory.createStringLiteralFromNode(requireArgument));
         if (options.debug) {
-            console.log(`Transformed:`);
-            console.log(`\t${node.getText()}`);
-            console.log(`\texport * from ${requireArgument.getText()};`);
+            let source = `${node.getText()}`;
+            let target = `export * from ${requireArgument.getText()};`;
+            console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
         }
         return newNode;
     }
@@ -182,9 +213,9 @@ define("lib/transformers", ["require", "exports", "typescript", "lib/is"], funct
         }
         let newNode = factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(factory.createIdentifier(importIdentifier.getText()))), factory.createStringLiteralFromNode(requireArgument));
         if (options.debug) {
-            console.log(`Transformed:`);
-            console.log(`\t${node.getText()}`);
-            console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+            let source = `${node.getText()}`;
+            let target = `import * as ${importIdentifier.getText()} from ${requireArgument.getText()};`;
+            console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
         }
         return newNode;
     }
@@ -238,9 +269,9 @@ define("lib/transformers", ["require", "exports", "typescript", "lib/is"], funct
         }
         let newNode = factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(factory.createIdentifier(exportIdentifier.getText())), factory.createStringLiteralFromNode(requireArgument));
         if (options.debug) {
-            console.log(`Transformed:`);
-            console.log(`\t${node.getText()}`);
-            console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+            let source = `${node.getText()}`;
+            let target = `export * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`;
+            console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
         }
         return newNode;
     }
@@ -309,9 +340,9 @@ define("lib/transformers", ["require", "exports", "typescript", "lib/is"], funct
         }
         let newNode = factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(factory.createIdentifier(exportIdentifier.getText())), factory.createStringLiteralFromNode(requireArgument));
         if (options.debug) {
-            console.log(`Transformed:`);
-            console.log(`\t${node.getText()}`);
-            console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+            let source = `${node.getText()}`;
+            let target = `export * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`;
+            console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
         }
         return newNode;
     }
@@ -345,16 +376,16 @@ define("lib/transformers", ["require", "exports", "typescript", "lib/is"], funct
         }
         let newNode = factory.createImportDeclaration(undefined, undefined, undefined, factory.createStringLiteralFromNode(requireArgument));
         if (options.debug) {
-            console.log(`Transformed:`);
-            console.log(`\t${node.getText()}`);
-            console.log(`\timport ${requireArgument.getText()};`);
+            let source = `${node.getText()}`;
+            let target = `import ${requireArgument.getText()};`;
+            console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
         }
         return newNode;
     }
     exports.esmSideEffectsImportFromCjsRequire = esmSideEffectsImportFromCjsRequire;
     ;
 });
-define("lib/index", ["require", "exports", "typescript", "lib/is", "lib/transformers"], function (require, exports, libts, is, transformers) {
+define("lib/index", ["require", "exports", "typescript", "lib/is", "lib/terminal", "lib/transformers"], function (require, exports, libts, is, terminal, transformers) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -419,10 +450,7 @@ define("lib/index", ["require", "exports", "typescript", "lib/is", "lib/transfor
                     }
                 }
                 if (options.debug) {
-                    console.log(`Resolved:`);
-                    console.log(`\t"${moduleName}"`);
-                    console.log(`\t"${resolvedFileName}"`);
-                    console.log(`\t(${isExternalLibraryImport ? "external" : "internal"})`);
+                    console.log(`Resolved ${terminal.stylize("\"" + moduleName + "\"", terminal.FG_YELLOW)} as ${terminal.stylize("\"" + resolvedFileName + "\"", terminal.FG_YELLOW)} (${terminal.stylize(isExternalLibraryImport ? "external" : "internal", terminal.FG_MAGENTA)})`);
                 }
                 return {
                     resolvedFileName,

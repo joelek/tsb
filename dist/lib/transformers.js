@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.esmSideEffectsImportFromCjsRequire = exports.esmExportStarFromImportStarRequire = exports.esmExportFromCjsRequire = exports.esmImportFromCjsRequire = exports.esmExportStarFromExportStarRequire = exports.esmImportStarFromImportStarRequire = void 0;
 const libts = require("typescript");
 const is = require("./is");
+const terminal = require("./terminal");
 // Transforms `var/let/const <import> = __importStar(require(<path>));` into `import * as <import> from <path>;`.
 function esmImportStarFromImportStarRequire(node, factory, options) {
     if (!libts.isVariableStatement(node)) {
@@ -58,9 +59,9 @@ function esmImportStarFromImportStarRequire(node, factory, options) {
     }
     let newNode = factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(factory.createIdentifier(importIdentifier.getText()))), factory.createStringLiteralFromNode(requireArgument));
     if (options.debug) {
-        console.log(`Transformed:`);
-        console.log(`\t${node.getText()}`);
-        console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+        let source = `${node.getText()}`;
+        let target = `import * as ${importIdentifier.getText()} from ${requireArgument.getText()};`;
+        console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
     }
     return newNode;
 }
@@ -114,9 +115,9 @@ function esmExportStarFromExportStarRequire(node, factory, options) {
     }
     let newNode = factory.createExportDeclaration(undefined, undefined, false, undefined, factory.createStringLiteralFromNode(requireArgument));
     if (options.debug) {
-        console.log(`Transformed:`);
-        console.log(`\t${node.getText()}`);
-        console.log(`\texport * from ${requireArgument.getText()};`);
+        let source = `${node.getText()}`;
+        let target = `export * from ${requireArgument.getText()};`;
+        console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
     }
     return newNode;
 }
@@ -162,9 +163,9 @@ function esmImportFromCjsRequire(node, factory, options) {
     }
     let newNode = factory.createImportDeclaration(undefined, undefined, factory.createImportClause(false, undefined, factory.createNamespaceImport(factory.createIdentifier(importIdentifier.getText()))), factory.createStringLiteralFromNode(requireArgument));
     if (options.debug) {
-        console.log(`Transformed:`);
-        console.log(`\t${node.getText()}`);
-        console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+        let source = `${node.getText()}`;
+        let target = `import * as ${importIdentifier.getText()} from ${requireArgument.getText()};`;
+        console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
     }
     return newNode;
 }
@@ -218,9 +219,9 @@ function esmExportFromCjsRequire(node, factory, options) {
     }
     let newNode = factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(factory.createIdentifier(exportIdentifier.getText())), factory.createStringLiteralFromNode(requireArgument));
     if (options.debug) {
-        console.log(`Transformed:`);
-        console.log(`\t${node.getText()}`);
-        console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+        let source = `${node.getText()}`;
+        let target = `export * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`;
+        console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
     }
     return newNode;
 }
@@ -289,9 +290,9 @@ function esmExportStarFromImportStarRequire(node, factory, options) {
     }
     let newNode = factory.createExportDeclaration(undefined, undefined, false, factory.createNamespaceExport(factory.createIdentifier(exportIdentifier.getText())), factory.createStringLiteralFromNode(requireArgument));
     if (options.debug) {
-        console.log(`Transformed:`);
-        console.log(`\t${node.getText()}`);
-        console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+        let source = `${node.getText()}`;
+        let target = `export * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`;
+        console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
     }
     return newNode;
 }
@@ -325,9 +326,9 @@ function esmSideEffectsImportFromCjsRequire(node, factory, options) {
     }
     let newNode = factory.createImportDeclaration(undefined, undefined, undefined, factory.createStringLiteralFromNode(requireArgument));
     if (options.debug) {
-        console.log(`Transformed:`);
-        console.log(`\t${node.getText()}`);
-        console.log(`\timport ${requireArgument.getText()};`);
+        let source = `${node.getText()}`;
+        let target = `import ${requireArgument.getText()};`;
+        console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
     }
     return newNode;
 }
