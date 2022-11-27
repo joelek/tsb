@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 define("app", [], {
     "name": "@joelek/ts-bundle",
-    "version": "1.3.0"
+    "version": "1.4.0"
 });
 define("lib/is", ["require", "exports"], function (require, exports) {
     "use strict";
