@@ -158,3 +158,4 @@ NB: This project targets TypeScript 4 in strict mode.
 ## Roadmap
 
 * Extract library functions into separate subproject.
+* Add support for JSON modules.
