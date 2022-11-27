@@ -8,19 +8,21 @@ type ModuleCallback = {
 	(...exports: Array<Exports>): void;
 };
 
+type ModuleInitializer = ModuleCallback | Exports;
+
 type ModuleState = {
-	callback: ModuleCallback;
+	initializer: ModuleInitializer;
 	dependencies: Array<string>;
 	module: Module | null;
 };
 
 type Define = {
-	(name: string, dependencies: Array<string>, callback: ModuleCallback): void;
+	(name: string, dependencies: Array<string>, initializer: ModuleInitializer): void;
 	moduleStates: Map<string, ModuleState>;
 	dependentsMap: Map<string, Set<string>>;
 };
 
-function define(name: string, dependencies: Array<string>, callback: ModuleCallback): void {
+function define(name: string, dependencies: Array<string>, initializer: ModuleInitializer): void {
 	let self = define as Define;
 	if (self.moduleStates == null) {
 		self.moduleStates = new Map<string, ModuleState>();
@@ -38,7 +40,7 @@ function define(name: string, dependencies: Array<string>, callback: ModuleCallb
 		}
 		let exports = Array<Exports>();
 		let module = {
-			exports: {}
+			exports: {} as Exports
 		};
 		for (let dependency of moduleState.dependencies) {
 			if (dependency === "require") {
@@ -63,7 +65,11 @@ function define(name: string, dependencies: Array<string>, callback: ModuleCallb
 			}
 			exports.push(moduleState.module.exports);
 		}
-		moduleState.callback(...exports);
+		if (typeof moduleState.initializer === "function") {
+			moduleState.initializer(...exports);
+		} else {
+			module.exports = moduleState.initializer;
+		}
 		moduleState.module = module;
 		let dependents = self.dependentsMap.get(name);
 		if (dependents != null) {
@@ -74,10 +80,10 @@ function define(name: string, dependencies: Array<string>, callback: ModuleCallb
 	}
 	let moduleState = self.moduleStates.get(name);
 	if (moduleState != null) {
-		throw "Duplicate module found with name " + name + "!";
+		throw new Error("Duplicate module found with name " + name + "!");
 	}
 	moduleState = {
-		callback: callback,
+		initializer: initializer,
 		dependencies: dependencies,
 		module: null
 	};
