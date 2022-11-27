@@ -156,3 +156,5 @@ npm install [-g] joelek/ts-bundle#master
 NB: This project targets TypeScript 4 in strict mode.
 
 ## Roadmap
+
+* Write unit tests.
