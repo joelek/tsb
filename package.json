@@ -15,12 +15,13 @@
 		"url": "https://github.com/joelek/ts-bundle.git"
 	},
 	"scripts": {
-		"build": "npm run compile && npm run package",
+		"appgen": "node -p \"JSON.stringify((({ name, version }) => ({ name, version }))(require('./package.json')), null, '\t')\" > ./source/app.json",
+		"build": "npm run appgen && npm run compile && npm run package && npm run test",
 		"clean": "rm -rf ./build/ ./node_modules/",
 		"compile": "rm -rf ./build/* && npx tsc --build",
 		"package": "rm -rf ./dist/* && node ./build/cli/index.js --debug=true --entry=./build/cli/index.js --bundle=./dist/cli.js",
-		"preversion": "npm run build && git add ./",
-		"postversion": "git push && git push --tags"
+		"postversion": "npm run build && git add ./ && git commit --amend --no-edit && git push && git push --tags",
+		"test": ""
 	},
 	"version": "1.2.1"
 }

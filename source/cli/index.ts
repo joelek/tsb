@@ -1,28 +1,28 @@
 #!/usr/bin/env node
 
+import * as app from "../app.json";
 import * as bundler from "./bundler";
 import * as is from "./is";
 import * as shared from "./shared";
 
 function run(): number {
 	let options: Partial<shared.Options> = {};
-	let foundUnrecognizedArgument = false;
-	for (let argv of process.argv.slice(2)) {
+	let unrecognizedArguments = [] as Array<string>;
+	for (let arg of process.argv.slice(2)) {
 		let parts: RegExpExecArray | null = null;
 		if (false) {
-		} else if ((parts = /^--entry=(.+)$/.exec(argv)) != null) {
+		} else if ((parts = /^--entry=(.+)$/.exec(arg)) != null) {
 			options.entry = parts[1];
-		} else if ((parts = /^--bundle=(.+)$/.exec(argv)) != null) {
+		} else if ((parts = /^--bundle=(.+)$/.exec(arg)) != null) {
 			options.bundle = parts[1];
-		} else if ((parts = /^--debug=(true|false)$/.exec(argv)) != null) {
+		} else if ((parts = /^--debug=(true|false)$/.exec(arg)) != null) {
 			options.debug = parts[1] === "true";
-		} else if ((parts = /^--dependencies=(true|false)$/.exec(argv)) != null) {
+		} else if ((parts = /^--dependencies=(true|false)$/.exec(arg)) != null) {
 			options.dependencies = parts[1] === "true";
-		} else if ((parts = /^--dev-dependencies=(true|false)$/.exec(argv)) != null) {
+		} else if ((parts = /^--dev-dependencies=(true|false)$/.exec(arg)) != null) {
 			options.devDependencies = parts[1] === "true";
 		} else {
-			foundUnrecognizedArgument = true;
-			process.stderr.write(`Unrecognized argument \"${argv}\"!\n`);
+			unrecognizedArguments.push(arg);
 		}
 	}
 	let entry = options.entry;
@@ -30,7 +30,13 @@ function run(): number {
 	let debug = options.debug ?? false;
 	let dependencies = options.dependencies ?? false;
 	let devDependencies = options.devDependencies ?? true;
-	if (foundUnrecognizedArgument || is.absent(entry) || is.absent(bundle)) {
+	if (unrecognizedArguments.length > 0 || is.absent(entry) || is.absent(bundle)) {
+		process.stderr.write(`${app.name} v${app.version}\n`);
+		process.stderr.write(`\n`);
+		for (let unrecognizedArgument of unrecognizedArguments) {
+			process.stderr.write(`Unrecognized argument "${unrecognizedArgument}"!\n`);
+		}
+		process.stderr.write(`\n`);
 		process.stderr.write(`Arguments:\n`);
 		process.stderr.write(`	--entry=string\n`);
 		process.stderr.write(`		Set entry point (input file) for bundling.\n`);
