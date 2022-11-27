@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-define("is", ["require", "exports"], function (require, exports) {
+define("app", [], {
+    "name": "@joelek/ts-bundle",
+    "version": "1.2.1"
+});
+define("cli/is", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.present = exports.absent = void 0;
@@ -14,7 +18,7 @@ define("is", ["require", "exports"], function (require, exports) {
     exports.present = present;
     ;
 });
-define("transformers", ["require", "exports", "typescript", "is"], function (require, exports, libts, is) {
+define("cli/transformers", ["require", "exports", "typescript", "cli/is"], function (require, exports, libts, is) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -350,12 +354,12 @@ define("transformers", ["require", "exports", "typescript", "is"], function (req
     exports.esmSideEffectsImportFromCjsRequire = esmSideEffectsImportFromCjsRequire;
     ;
 });
-define("bundler", ["require", "exports", "typescript", "is", "transformers"], function (require, exports, libts, is, transformers) {
+define("cli/bundler", ["require", "exports", "typescript", "cli/is", "cli/transformers"], function (require, exports, libts, is, transformers) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.bundle = void 0;
-    const DEFINE = `function define(e,t,l){let n=define;function u(e){return require(e)}null==n.moduleStates&&(n.moduleStates=new Map),null==n.dependentsMap&&(n.dependentsMap=new Map);let d=n.moduleStates.get(e);if(null!=d)throw"Duplicate module found with name "+e+"!";d={callback:l,dependencies:t,module:null},n.moduleStates.set(e,d);for(let l of t){let t=n.dependentsMap.get(l);null==t&&(t=new Set,n.dependentsMap.set(l,t)),t.add(e)}!function e(t){let l=n.moduleStates.get(t);if(null==l||null!=l.module)return;let d=Array(),o={exports:{}};for(let e of l.dependencies){if("require"===e){d.push(u);continue}if("module"===e){d.push(o);continue}if("exports"===e){d.push(o.exports);continue}try{d.push(u(e));continue}catch(e){}let t=n.moduleStates.get(e);if(null==t||null==t.module)return;d.push(t.module.exports)}l.callback(...d),l.module=o;let p=n.dependentsMap.get(t);if(null!=p)for(let t of p)e(t)}(e)}`;
+    const DEFINE = `function define(e,t,n){let l=define;function u(e){return require(e)}null==l.moduleStates&&(l.moduleStates=new Map),null==l.dependentsMap&&(l.dependentsMap=new Map);let i=l.moduleStates.get(e);if(null!=i)throw new Error("Duplicate module found with name "+e+"!");i={initializer:n,dependencies:t,module:null},l.moduleStates.set(e,i);for(let n of t){let t=l.dependentsMap.get(n);null==t&&(t=new Set,l.dependentsMap.set(n,t)),t.add(e)}!function e(t){let n=l.moduleStates.get(t);if(null==n||null!=n.module)return;let i=Array(),o={exports:{}};for(let e of n.dependencies){if("require"===e){i.push(u);continue}if("module"===e){i.push(o);continue}if("exports"===e){i.push(o.exports);continue}try{i.push(u(e));continue}catch(e){}let t=l.moduleStates.get(e);if(null==t||null==t.module)return;i.push(t.module.exports)}"function"==typeof n.initializer?n.initializer(...i):o.exports=n.initializer,n.module=o;let d=l.dependentsMap.get(t);if(null!=d)for(let t of d)e(t)}(e)}`;
     function createTransformers(options) {
         return {
             before: [
@@ -499,36 +503,35 @@ define("bundler", ["require", "exports", "typescript", "is", "transformers"], fu
     exports.bundle = bundle;
     ;
 });
-define("index", ["require", "exports", "bundler", "is"], function (require, exports, bundler, is) {
+define("cli/index", ["require", "exports", "app", "cli/bundler", "cli/is"], function (require, exports, app, bundler, is) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     Object.defineProperty(exports, "__esModule", { value: true });
     function run() {
         var _a, _b, _c;
         let options = {};
-        let foundUnrecognizedArgument = false;
-        for (let argv of process.argv.slice(2)) {
+        let unrecognizedArguments = [];
+        for (let arg of process.argv.slice(2)) {
             let parts = null;
             if (false) {
             }
-            else if ((parts = /^--entry=(.+)$/.exec(argv)) != null) {
+            else if ((parts = /^--entry=(.+)$/.exec(arg)) != null) {
                 options.entry = parts[1];
             }
-            else if ((parts = /^--bundle=(.+)$/.exec(argv)) != null) {
+            else if ((parts = /^--bundle=(.+)$/.exec(arg)) != null) {
                 options.bundle = parts[1];
             }
-            else if ((parts = /^--debug=(true|false)$/.exec(argv)) != null) {
+            else if ((parts = /^--debug=(true|false)$/.exec(arg)) != null) {
                 options.debug = parts[1] === "true";
             }
-            else if ((parts = /^--dependencies=(true|false)$/.exec(argv)) != null) {
+            else if ((parts = /^--dependencies=(true|false)$/.exec(arg)) != null) {
                 options.dependencies = parts[1] === "true";
             }
-            else if ((parts = /^--dev-dependencies=(true|false)$/.exec(argv)) != null) {
+            else if ((parts = /^--dev-dependencies=(true|false)$/.exec(arg)) != null) {
                 options.devDependencies = parts[1] === "true";
             }
             else {
-                foundUnrecognizedArgument = true;
-                process.stderr.write(`Unrecognized argument \"${argv}\"!\n`);
+                unrecognizedArguments.push(arg);
             }
         }
         let entry = options.entry;
@@ -536,7 +539,13 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
         let debug = (_a = options.debug) !== null && _a !== void 0 ? _a : false;
         let dependencies = (_b = options.dependencies) !== null && _b !== void 0 ? _b : false;
         let devDependencies = (_c = options.devDependencies) !== null && _c !== void 0 ? _c : true;
-        if (foundUnrecognizedArgument || is.absent(entry) || is.absent(bundle)) {
+        if (unrecognizedArguments.length > 0 || is.absent(entry) || is.absent(bundle)) {
+            process.stderr.write(`${app.name} v${app.version}\n`);
+            process.stderr.write(`\n`);
+            for (let unrecognizedArgument of unrecognizedArguments) {
+                process.stderr.write(`Unrecognized argument "${unrecognizedArgument}"!\n`);
+            }
+            process.stderr.write(`\n`);
             process.stderr.write(`Arguments:\n`);
             process.stderr.write(`	--entry=string\n`);
             process.stderr.write(`		Set entry point (input file) for bundling.\n`);
@@ -567,4 +576,4 @@ define("index", ["require", "exports", "bundler", "is"], function (require, expo
     }
     process.exit(run());
 });
-function define(e,t,l){let n=define;function u(e){return require(e)}null==n.moduleStates&&(n.moduleStates=new Map),null==n.dependentsMap&&(n.dependentsMap=new Map);let d=n.moduleStates.get(e);if(null!=d)throw"Duplicate module found with name "+e+"!";d={callback:l,dependencies:t,module:null},n.moduleStates.set(e,d);for(let l of t){let t=n.dependentsMap.get(l);null==t&&(t=new Set,n.dependentsMap.set(l,t)),t.add(e)}!function e(t){let l=n.moduleStates.get(t);if(null==l||null!=l.module)return;let d=Array(),o={exports:{}};for(let e of l.dependencies){if("require"===e){d.push(u);continue}if("module"===e){d.push(o);continue}if("exports"===e){d.push(o.exports);continue}try{d.push(u(e));continue}catch(e){}let t=n.moduleStates.get(e);if(null==t||null==t.module)return;d.push(t.module.exports)}l.callback(...d),l.module=o;let p=n.dependentsMap.get(t);if(null!=p)for(let t of p)e(t)}(e)}
+function define(e,t,n){let l=define;function u(e){return require(e)}null==l.moduleStates&&(l.moduleStates=new Map),null==l.dependentsMap&&(l.dependentsMap=new Map);let i=l.moduleStates.get(e);if(null!=i)throw new Error("Duplicate module found with name "+e+"!");i={initializer:n,dependencies:t,module:null},l.moduleStates.set(e,i);for(let n of t){let t=l.dependentsMap.get(n);null==t&&(t=new Set,l.dependentsMap.set(n,t)),t.add(e)}!function e(t){let n=l.moduleStates.get(t);if(null==n||null!=n.module)return;let i=Array(),o={exports:{}};for(let e of n.dependencies){if("require"===e){i.push(u);continue}if("module"===e){i.push(o);continue}if("exports"===e){i.push(o.exports);continue}try{i.push(u(e));continue}catch(e){}let t=l.moduleStates.get(e);if(null==t||null==t.module)return;i.push(t.module.exports)}"function"==typeof n.initializer?n.initializer(...i):o.exports=n.initializer,n.module=o;let d=l.dependentsMap.get(t);if(null!=d)for(let t of d)e(t)}(e)}
