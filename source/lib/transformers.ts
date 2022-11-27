@@ -1,6 +1,7 @@
 import * as libts from "typescript";
 import * as is from "./is";
 import * as shared from "./shared";
+import * as terminal from "./terminal";
 
 // Transforms `var/let/const <import> = __importStar(require(<path>));` into `import * as <import> from <path>;`.
 export function esmImportStarFromImportStarRequire(node: libts.Node, factory: libts.NodeFactory, options: shared.Options): libts.Node {
@@ -68,9 +69,9 @@ export function esmImportStarFromImportStarRequire(node: libts.Node, factory: li
 		factory.createStringLiteralFromNode(requireArgument)
 	);
 	if (options.debug) {
-		console.log(`Transformed:`);
-		console.log(`\t${node.getText()}`);
-		console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+		let source = `${node.getText()}`;
+		let target = `import * as ${importIdentifier.getText()} from ${requireArgument.getText()};`;
+		console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
 	}
 	return newNode;
 };
@@ -129,9 +130,9 @@ export function esmExportStarFromExportStarRequire(node: libts.Node, factory: li
 		factory.createStringLiteralFromNode(requireArgument)
 	);
 	if (options.debug) {
-		console.log(`Transformed:`);
-		console.log(`\t${node.getText()}`);
-		console.log(`\texport * from ${requireArgument.getText()};`);
+		let source = `${node.getText()}`;
+		let target = `export * from ${requireArgument.getText()};`;
+		console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
 	}
 	return newNode;
 };
@@ -187,9 +188,9 @@ export function esmImportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 		factory.createStringLiteralFromNode(requireArgument)
 	);
 	if (options.debug) {
-		console.log(`Transformed:`);
-		console.log(`\t${node.getText()}`);
-		console.log(`\timport * as ${importIdentifier.getText()} from ${requireArgument.getText()};`);
+		let source = `${node.getText()}`;
+		let target = `import * as ${importIdentifier.getText()} from ${requireArgument.getText()};`;
+		console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
 	}
 	return newNode;
 };
@@ -250,9 +251,9 @@ export function esmExportFromCjsRequire(node: libts.Node, factory: libts.NodeFac
 		factory.createStringLiteralFromNode(requireArgument)
 	);
 	if (options.debug) {
-		console.log(`Transformed:`);
-		console.log(`\t${node.getText()}`);
-		console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+		let source = `${node.getText()}`;
+		let target = `export * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`;
+		console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
 	}
 	return newNode;
 };
@@ -328,9 +329,9 @@ export function esmExportStarFromImportStarRequire(node: libts.Node, factory: li
 		factory.createStringLiteralFromNode(requireArgument)
 	);
 	if (options.debug) {
-		console.log(`Transformed:`);
-		console.log(`\t${node.getText()}`);
-		console.log(`\texport * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`);
+		let source = `${node.getText()}`;
+		let target = `export * as ${exportIdentifier.getText()} from ${requireArgument.getText()};`;
+		console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
 	}
 	return newNode;
 };
@@ -368,9 +369,9 @@ export function esmSideEffectsImportFromCjsRequire(node: libts.Node, factory: li
 		factory.createStringLiteralFromNode(requireArgument)
 	);
 	if (options.debug) {
-		console.log(`Transformed:`);
-		console.log(`\t${node.getText()}`);
-		console.log(`\timport ${requireArgument.getText()};`);
+		let source = `${node.getText()}`;
+		let target = `import ${requireArgument.getText()};`;
+		console.log(`Transformed ${terminal.stylize(source, terminal.FG_RED)} into ${terminal.stylize(target, terminal.FG_GREEN)}`);
 	}
 	return newNode;
 };

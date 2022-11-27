@@ -1,6 +1,7 @@
 import * as libts from "typescript";
 import * as is from "./is";
 import * as shared from "./shared";
+import * as terminal from "./terminal";
 import * as transformers from "./transformers";
 
 export { Options } from "./shared";
@@ -65,10 +66,7 @@ function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, op
 				}
 			}
 			if (options.debug) {
-				console.log(`Resolved:`);
-				console.log(`\t"${moduleName}"`);
-				console.log(`\t"${resolvedFileName}"`);
-				console.log(`\t(${isExternalLibraryImport ? "external" : "internal"})`);
+				console.log(`Resolved ${terminal.stylize("\"" + moduleName + "\"", terminal.FG_YELLOW)} as ${terminal.stylize("\"" + resolvedFileName + "\"", terminal.FG_YELLOW)} (${terminal.stylize(isExternalLibraryImport ? "external" : "internal", terminal.FG_MAGENTA)})`);
 			}
 			return {
 				resolvedFileName,
