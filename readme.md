@@ -158,3 +158,4 @@ NB: This project targets TypeScript 4 in strict mode.
 ## Roadmap
 
 * Write unit tests.
+* Handle decorators being required in TS4.7 for createImportDeclaration() and createExportDeclaration() and deprecated in TS4.8.
