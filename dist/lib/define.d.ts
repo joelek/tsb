@@ -1,17 +1,17 @@
-declare type Exports = any;
-declare type Module = {
+type Exports = any;
+type Module = {
     exports: Exports;
 };
-declare type ModuleCallback = {
+type ModuleCallback = {
     (...exports: Array<Exports>): void;
 };
-declare type ModuleInitializer = ModuleCallback | Exports;
-declare type ModuleState = {
+type ModuleInitializer = ModuleCallback | Exports;
+type ModuleState = {
     initializer: ModuleInitializer;
     dependencies: Array<string>;
     module: Module | null;
 };
-declare type Define = {
+type Define = {
     (name: string, dependencies: Array<string>, initializer: ModuleInitializer): void;
     moduleStates: Map<string, ModuleState>;
     dependentsMap: Map<string, Set<string>>;
