@@ -1,4 +1,4 @@
-# @joelek/ts-bundle
+# @joelek/tsb
 
 JavaScript bundler powered by the TypeScript compiler.
 
@@ -144,13 +144,13 @@ Ethereum contributions can be made to address `0xf1B63d95BEfEdAf70B3623B1A4Ba0D9
 Releases follow semantic versioning and release packages are published using the GitHub platform. Use the following command to install the latest release.
 
 ```
-npm install [-g] joelek/ts-bundle#semver:^1.3
+npm install [-g] joelek/tsb#semver:^1.3
 ```
 
 Use the following command to install the very latest build. The very latest build may include breaking changes and should not be used in production environments.
 
 ```
-npm install [-g] joelek/ts-bundle#master
+npm install [-g] joelek/tsb#master
 ```
 
 NB: This project targets TypeScript 4 in strict mode.

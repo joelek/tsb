@@ -10,10 +10,10 @@
 	},
 	"license": "MIT",
 	"main": "./dist/lib/index.js",
-	"name": "@joelek/ts-bundle",
+	"name": "@joelek/tsb",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/joelek/ts-bundle.git"
+		"url": "https://github.com/joelek/tsb.git"
 	},
 	"scripts": {
 		"appgen": "node -e \"process.stdout.write(JSON.stringify((({ name, version }) => ({ name, timestamp: Date.now(), version }))(require('./package.json')), null, '\t').split(/\\r?\\n/).join(require('os').EOL) + require('os').EOL)\" > ./source/app.json",

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 define("app", [], {
-    "name": "@joelek/ts-bundle",
+    "name": "@joelek/tsb",
     "version": "1.4.1"
 });
 define("lib/is", ["require", "exports"], function (require, exports) {
