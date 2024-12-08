@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 define("app", [], {
     "name": "@joelek/tsb",
-    "timestamp": 1733660405656,
+    "timestamp": 1733669981286,
     "version": "1.4.2"
 });
 define("lib/is", ["require", "exports"], function (require, exports) {
