@@ -38,7 +38,7 @@ function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, op
 	let dependencies = pkg?.dependencies ?? {};
 	let devDependencies = pkg?.devDependencies ?? {};
 	let host = libts.createCompilerHost(compilerOptions);
-	let declarationFiles = new Array<string>();
+	let declarationFiles = new Set<string>();
 	host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
 		return moduleNames.map((moduleName) => {
 			let result = libts.resolveModuleName(moduleName, containingFile, compilerOptions, libts.sys);
@@ -53,7 +53,7 @@ function createCompilerHost(compilerOptions: libts.CompilerOptions, pkg: any, op
 				if (host.fileExists(resolvedFileNameJs)) {
 					resolvedFileName = resolvedFileNameJs;
 				} else {
-					declarationFiles.push(moduleName);
+					declarationFiles.add(moduleName);
 					return;
 				}
 			}
