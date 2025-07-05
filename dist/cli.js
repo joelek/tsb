@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 define("app", [], {
     "name": "@joelek/tsb",
-    "timestamp": 1733670018420,
+    "timestamp": 1751727297913,
     "version": "1.4.3"
 });
 define("lib/is", ["require", "exports"], function (require, exports) {
@@ -422,7 +422,7 @@ define("lib/index", ["require", "exports", "typescript", "lib/is", "lib/terminal
         let dependencies = (_a = pkg === null || pkg === void 0 ? void 0 : pkg.dependencies) !== null && _a !== void 0 ? _a : {};
         let devDependencies = (_b = pkg === null || pkg === void 0 ? void 0 : pkg.devDependencies) !== null && _b !== void 0 ? _b : {};
         let host = libts.createCompilerHost(compilerOptions);
-        let declarationFiles = new Array();
+        let declarationFiles = new Set();
         host.resolveModuleNames = (moduleNames, containingFile, reusedNames, redirectedReference, compilerOptions) => {
             return moduleNames.map((moduleName) => {
                 let result = libts.resolveModuleName(moduleName, containingFile, compilerOptions, libts.sys);
@@ -438,7 +438,7 @@ define("lib/index", ["require", "exports", "typescript", "lib/is", "lib/terminal
                         resolvedFileName = resolvedFileNameJs;
                     }
                     else {
-                        declarationFiles.push(moduleName);
+                        declarationFiles.add(moduleName);
                         return;
                     }
                 }
