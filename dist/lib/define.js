@@ -7,8 +7,21 @@ function define(name, dependencies, initializer) {
     if (self.dependentsMap == null) {
         self.dependentsMap = new Map();
     }
-    function req(name) {
-        return require(name);
+    function req(name, resolve, reject) {
+        if (typeof name === "string") {
+            return require(name);
+        }
+        else {
+            let exports = Array();
+            for (let dependency of name) {
+                let moduleState = self.moduleStates.get(dependency);
+                if (moduleState == null || moduleState.module == null) {
+                    return reject === null || reject === void 0 ? void 0 : reject(new Error("Expected module with name " + dependency + " to be loaded!"));
+                }
+                exports.push(moduleState.module.exports);
+            }
+            return resolve === null || resolve === void 0 ? void 0 : resolve(...exports);
+        }
     }
     function resolve(name) {
         let moduleState = self.moduleStates.get(name);
