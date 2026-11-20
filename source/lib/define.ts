@@ -30,8 +30,22 @@ function define(name: string, dependencies: Array<string>, initializer: ModuleIn
 	if (self.dependentsMap == null) {
 		self.dependentsMap = new Map<string, Set<string>>();
 	}
-	function req(name: string): any {
-		return require(name);
+	function req(name: string): any;
+	function req(name: Array<string>, resolve: (...modules: Array<any>) => void, reject: (error: any) => void): any;
+	function req(name: string | Array<string>, resolve?: (...modules: Array<any>) => void, reject?: (error: any) => void): any {
+		if (typeof name === "string") {
+			return require(name);
+		} else {
+			let exports = Array<Exports>();
+			for (let dependency of name) {
+				let moduleState = self.moduleStates.get(dependency);
+				if (moduleState == null || moduleState.module == null) {
+					return reject?.(new Error("Expected module with name " + dependency + " to be loaded!"));
+				}
+				exports.push(moduleState.module.exports);
+			}
+			return resolve?.(...exports);
+		}
 	}
 	function resolve(name: string): void {
 		let moduleState = self.moduleStates.get(name);
